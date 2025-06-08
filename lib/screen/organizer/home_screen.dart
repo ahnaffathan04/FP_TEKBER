@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class OrganizerHomeScreen extends StatelessWidget {
   const OrganizerHomeScreen({Key? key}) : super(key: key);
 
+  get context => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -339,8 +341,7 @@ class OrganizerHomeScreen extends StatelessWidget {
       child: Row(
         children: [
           Padding(
-            padding:
-                const EdgeInsets.only(left: 28), // Home icon lebih mepet kiri
+            padding: const EdgeInsets.only(left: 28),
             child: Image.asset(
               'organizer/navbar/Home.png',
               width: 32,
@@ -349,16 +350,21 @@ class OrganizerHomeScreen extends StatelessWidget {
           ),
           Expanded(
             child: Center(
-              child: Image.asset(
-                'organizer/navbar/Plus.png',
-                width: 32,
-                height: 32,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  context.push('/tambah-konser');
+                },
+                child: Image.asset(
+                  'organizer/navbar/Plus.png',
+                  width: 32,
+                  height: 32,
+                ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-                right: 28), // Setting icon lebih mepet kanan
+            padding: const EdgeInsets.only(right: 28),
             child: Image.asset(
               'organizer/navbar/Settings.png',
               width: 32,

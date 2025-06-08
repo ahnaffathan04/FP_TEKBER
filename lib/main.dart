@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'screen/organizer/home_screen.dart';
+import 'screen/organizer/tambah_konser.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,6 +16,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/organizer-home',
       builder: (context, state) => OrganizerHomeScreen(),
+    ),
+    GoRoute(
+      path: '/tambah-konser',
+      builder: (context, state) => TambahKonserScreen(),
     ),
   ],
 );
