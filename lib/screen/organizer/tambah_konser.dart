@@ -128,7 +128,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
                   label: 'Tanggal Konser',
                   controller: _tanggalController,
                   maxLines: 1,
-                  hintText: 'Pilih tanggal konser',
+                  hintText: '',
                 ),
               ),
             ),
@@ -137,14 +137,14 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
               label: 'Lokasi Konser',
               controller: _lokasiController,
               maxLines: 2,
-              hintText: 'Masukkan lokasi konser',
+              hintText: '',
             ),
             const SizedBox(height: 16),
             _buildTextField(
               label: 'Daftar Artist',
               controller: _artistController,
               maxLines: 6,
-              hintText: 'Masukkan daftar artist',
+              hintText: '',
             ),
             const SizedBox(height: 16),
             _buildTextField(
@@ -152,7 +152,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
               controller: _deskripsiController,
               maxLines: 10,
               fontWeight: FontWeight.w400,
-              hintText: 'Masukkan deskripsi konser',
+              hintText: '',
             ),
             const SizedBox(height: 16),
             // Poster Image Upload
@@ -203,17 +203,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.upload_file,
-                                    color: Color(0xFF44E3EF), size: 40),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Upload Poster',
-                                  style: TextStyle(
-                                    color: Color(0xFF8F9BB3),
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                  ),
-                                ),
+                                SizedBox(height: 4),
                               ],
                             ),
                           ),
@@ -304,7 +294,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
               context.push('/organizer-home');
             },
             style: ElevatedButton.styleFrom(
-              primary: Colors.transparent,
+              backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -349,7 +339,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
               _simpanKonser();
             },
             style: ElevatedButton.styleFrom(
-              primary: Colors.transparent,
+              backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -383,36 +373,50 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(
-            iconPath: 'organizer/navbar/home.png',
-            isActive: false,
-            onTap: () {
-              context.push('/organizer-home');
-            },
+          Padding(
+            padding: const EdgeInsets.only(left: 28),
+            child: _buildNavItem(
+              iconPath: 'organizer/navbar/home.png',
+              isActive: false,
+              iconSize: 32,
+              onTap: () {
+                context.push('/organizer-home');
+              },
+            ),
           ),
-          _buildNavItem(
-            iconPath: 'organizer/navbar/plus.png',
-            isActive: true,
-            onTap: () {},
+          Expanded(
+            child: Center(
+              child: _buildNavItem(
+                iconPath: 'organizer/navbar/plus.png',
+                isActive: true,
+                iconSize: 32,
+                onTap: () {},
+              ),
+            ),
           ),
-          _buildNavItem(
-            iconPath: 'organizer/navbar/settings.png',
-            isActive: false,
-            onTap: () {
-              // Navigate to settings
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 28),
+            child: _buildNavItem(
+              iconPath: 'organizer/navbar/settings.png',
+              isActive: false,
+              iconSize: 32,
+              onTap: () {
+                // Navigate to settings
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
+  // Update _buildNavItem agar menerima parameter iconSize
   Widget _buildNavItem({
     required String iconPath,
     required bool isActive,
     required VoidCallback onTap,
+    double iconSize = 24,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -423,8 +427,8 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
           children: [
             Image.asset(
               iconPath,
-              width: 24,
-              height: 24,
+              width: iconSize,
+              height: iconSize,
               color:
                   isActive ? const Color(0xFF44E3EF) : const Color(0xFF8F9BB3),
             ),

@@ -1,3 +1,4 @@
+import 'package:ezrameeting2tekber/screen/organizer/manage_tiket.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'screen/organizer/home_screen.dart';
@@ -21,6 +22,10 @@ final GoRouter _router = GoRouter(
       path: '/tambah-konser',
       builder: (context, state) => TambahKonserScreen(),
     ),
+    GoRoute(
+      path: '/tambah-tiket',
+      builder: (context, state) => TambahTiketScreen(),
+    ),
   ],
 );
 
@@ -30,6 +35,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerDelegate: _router.routerDelegate,
       routeInformationParser: _router.routeInformationParser,
+      routeInformationProvider: _router.routeInformationProvider,
       title: 'Organizer App',
       theme: ThemeData(
         primarySwatch: Colors.blue,

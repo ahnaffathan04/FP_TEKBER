@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class OrganizerHomeScreen extends StatelessWidget {
   const OrganizerHomeScreen({Key? key}) : super(key: key);
-
-  get context => null;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +45,7 @@ class OrganizerHomeScreen extends StatelessWidget {
               bottom: 0,
               left: 0,
               right: 0,
-              child: _buildBottomNavigation(),
+              child: _buildBottomNavigation(context),
             ),
           ],
         ),
@@ -325,7 +324,7 @@ class OrganizerHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigation() {
+  Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 60,
