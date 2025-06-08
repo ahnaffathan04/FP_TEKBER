@@ -1,8 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class OrganizerHomeScreen extends StatelessWidget {
+class OrganizerHomeScreen extends StatefulWidget {
   const OrganizerHomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<OrganizerHomeScreen> createState() => _OrganizerHomeScreenState();
+}
+
+class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  final List<Map<String, String>> concerts = [
+    {
+      'title': 'Sisforia : TGIF!\nSisforia',
+      'date': 'Sunday, 10 November 2024',
+      'venue': 'Jatim International Expo (JIE)',
+      'sold': 'Sold 183/200',
+      'image': 'organizer/concert1.png',
+      'rating': 'Rating (5.0)',
+    },
+    {
+      'title': 'EXSIST 2.0\nBernadya',
+      'date': 'Thursday, 12 December 2024',
+      'venue': 'Balai Pemuda Surabaya',
+      'sold': 'Sold : 115/300',
+      'image': 'organizer/concert2.png',
+      'rating': 'Rating (5.0)',
+    },
+    {
+      'title': 'Onfest 2024\nTipe-X, Juicy Luicy, dll',
+      'date': 'Saturday, 30 November 2024',
+      'venue': 'PTC Surabaya',
+      'sold': 'Sold : 285/300',
+      'image': 'organizer/concert3.png',
+      'rating': 'Rating (5.0)',
+    },
+    {
+      'title': 'Buzz Youth Fest\nSheila On 7, RAN, dll',
+      'date': 'Saturday, 25 January 2025',
+      'venue': 'Lap. Bhumi Marinir Karangpilang, Surabaya',
+      'sold': 'Sold : 310/400',
+      'image': 'organizer/concert4.png',
+      'rating': 'Rating (5.0)',
+    },
+  ];
+
+  String _searchText = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Map<String, String>> get _filteredConcerts {
+    if (_searchText.isEmpty) return concerts;
+    return concerts.where((concert) {
+      final title = concert['title']!.toLowerCase();
+      return title.contains(_searchText.toLowerCase());
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,29 +75,22 @@ class OrganizerHomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header section
                   _buildHeader(),
                   const SizedBox(height: 8),
-
-                  // Search section
                   _buildSearchSection(),
                   const SizedBox(height: 24),
-
-                  // Concert cards list
                   Expanded(
                     child: _buildConcertList(),
                   ),
                 ],
               ),
             ),
-
             // Floating camera button
             Positioned(
               bottom: 100,
               right: 16,
               child: _buildFloatingCameraButton(),
             ),
-
             // Bottom navigation
             Positioned(
               bottom: 0,
@@ -126,7 +177,7 @@ class OrganizerHomeScreen extends StatelessWidget {
             color: const Color(0xFF1A1B2E),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withOpacity(0.1),
+              color: const Color.fromARGB(26, 255, 255, 255), // 0.1 opacity
               width: 1,
             ),
           ),
@@ -134,13 +185,14 @@ class OrganizerHomeScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
-                    style: TextStyle(
+                    controller: _searchController,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontFamily: 'Poppins',
                     ),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Search here..',
                       hintStyle: TextStyle(
                         color: Color(0xFF8F9BB3),
@@ -148,14 +200,19 @@ class OrganizerHomeScreen extends StatelessWidget {
                       ),
                       border: InputBorder.none,
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchText = value;
+                      });
+                    },
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.only(right: 16),
                 child: Icon(
                   Icons.search,
-                  color: Color(0xFF8F9BB3),
+                  color: const Color(0xFF8F9BB3),
                   size: 20,
                 ),
               ),
@@ -167,45 +224,23 @@ class OrganizerHomeScreen extends StatelessWidget {
   }
 
   Widget _buildConcertList() {
-    final concerts = [
-      {
-        'title': 'Sisforia : TGIF!\nSisforia',
-        'date': 'Sunday, 10 November 2024',
-        'venue': 'Jatim International Expo (JIE)',
-        'sold': 'Sold 183/200',
-        'image': '',
-        'rating': 'Rating (5.0)',
-      },
-      {
-        'title': 'EXSIST 2.0\nBernadya',
-        'date': 'Thursday, 12 December 2024',
-        'venue': 'Balai Pemuda Surabaya',
-        'sold': 'Sold : 115/300',
-        'image': '',
-        'rating': 'Rating (5.0)',
-      },
-      {
-        'title': 'Onfest 2024\nTipe-X, Juicy Luicy, dll',
-        'date': 'Saturday, 30 November 2024',
-        'venue': 'PTC Surabaya',
-        'sold': 'Sold : 285/300',
-        'image': '',
-        'rating': 'Rating (5.0)',
-      },
-      {
-        'title': 'Buzz Youth Fest\nSheila On 7, RAN, dll',
-        'date': 'Saturday, 25 January 2025',
-        'venue': 'Lap. Bhumi Marinir Karangpilang, Surabaya',
-        'sold': 'Sold : 310/400',
-        'image': '',
-        'rating': 'Rating (5.0)',
-      },
-    ];
-
+    final filteredConcerts = _filteredConcerts;
+    if (filteredConcerts.isEmpty) {
+      return const Center(
+        child: Text(
+          'No concert found.',
+          style: TextStyle(
+            color: Colors.white54,
+            fontFamily: 'Poppins',
+            fontSize: 16,
+          ),
+        ),
+      );
+    }
     return ListView.builder(
-      itemCount: concerts.length,
+      itemCount: filteredConcerts.length,
       itemBuilder: (context, index) {
-        final concert = concerts[index];
+        final concert = filteredConcerts[index];
         return _buildConcertCard(
           title: concert['title']!,
           date: concert['date']!,
@@ -236,14 +271,16 @@ class OrganizerHomeScreen extends StatelessWidget {
           color: const Color(0xFF00FFB3),
           width: 2,
         ),
-        image: DecorationImage(
-          image: AssetImage(imagePath),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.4),
-            BlendMode.darken,
-          ),
-        ),
+        image: imagePath.isNotEmpty
+            ? DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.4),
+                  BlendMode.darken,
+                ),
+              )
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

@@ -84,7 +84,8 @@ class _TambahTiketScreenState extends State<TambahTiketScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: DropdownButtonFormField<String>(
                   value: _selectedKategori,
-                  icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF8F9BB3)),
+                  icon: const Icon(Icons.keyboard_arrow_down,
+                      color: Color(0xFF8F9BB3)),
                   dropdownColor: const Color(0xFF1A1B2E),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
