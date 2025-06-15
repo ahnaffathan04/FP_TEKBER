@@ -15,11 +15,11 @@ void main() {
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
   ));
-  runApp(const TicketBookingApp());
+  runApp(const MyApp());
 }
 
-class TicketBookingApp extends StatelessWidget {
-  const TicketBookingApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
