@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'screen/organizer/home_screen.dart';
 import 'screen/organizer/tambah_konser.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: 'https://eatimucqelcaoswpzitc.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhdGltdWNxZWxjYW9zd3B6aXRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMjU0OTMsImV4cCI6MjA2NTcwMTQ5M30.cWdbKCj6zK38cpO4OvyNpRHRPHRgF0VUuRSfPuoUcho',
+  );
   runApp(MyApp());
 }
 

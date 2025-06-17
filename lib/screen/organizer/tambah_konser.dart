@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class TambahKonserScreen extends StatefulWidget {
   const TambahKonserScreen({Key? key}) : super(key: key);
@@ -13,16 +15,42 @@ class TambahKonserScreen extends StatefulWidget {
 }
 
 class _TambahKonserScreenState extends State<TambahKonserScreen> {
+  bool isLoading = false;
+  Future<String?> uploadPoster(File file) async {
+    final fileName = file.path.split('/').last;
+    final storageResponse = await Supabase.instance.client.storage
+        .from('posterkonser')
+        .upload(fileName, file);
+
+    if (storageResponse.isEmpty) return null;
+
+    final url = Supabase.instance.client.storage
+        .from('posterkonser')
+        .getPublicUrl(fileName);
+    return url;
+  }
+
+  Future<String?> uploadPosterWeb(Uint8List bytes, String fileName) async {
+    final response = await Supabase.instance.client.storage
+        .from('posterkonser')
+        .uploadBinary(fileName, bytes);
+
+    if (response.isEmpty) return null;
+
+    final url = Supabase.instance.client.storage
+        .from('posterkonser')
+        .getPublicUrl(fileName);
+    return url;
+  }
+
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers for text fields (tanpa default value)
   final _namaKonserController = TextEditingController();
   final _tanggalController = TextEditingController();
   final _lokasiController = TextEditingController();
   final _artistController = TextEditingController();
   final _deskripsiController = TextEditingController();
 
-  // Tambahkan variabel untuk menyimpan bytes (web) dan file (mobile)
   Uint8List? _posterImageBytes;
   File? _posterImage;
 
@@ -46,7 +74,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
     );
     if (picked != null) {
       _tanggalController.text =
-          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+          "${picked.year.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.day}";
       setState(() {});
     }
   }
@@ -56,7 +84,7 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
-      withData: true, // penting untuk web
+      withData: true,
     );
     if (result != null) {
       setState(() {
@@ -439,25 +467,53 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
     );
   }
 
-  void _simpanKonser() {
+  Future<void> _simpanKonser() async {
     if (_formKey.currentState!.validate()) {
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Konser berhasil disimpan!',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: Color(0xFF10C7EF),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      setState(() => isLoading = true);
 
-      // Navigate back or to another screen
-      Navigator.of(context).pop();
+      String? posterUrl;
+      if (kIsWeb) {
+        // Untuk web: gunakan _posterImageBytes
+        if (_posterImageBytes == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Pilih gambar poster terlebih dahulu!')),
+          );
+          setState(() => isLoading = false);
+          return;
+        } else {
+          final fileName =
+              'poster_${DateTime.now().millisecondsSinceEpoch}.png';
+          posterUrl = await uploadPosterWeb(_posterImageBytes!, fileName);
+        }
+      } else {
+        // Untuk mobile/desktop: gunakan _posterImage
+        if (_posterImage == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Pilih gambar poster terlebih dahulu!')),
+          );
+          setState(() => isLoading = false);
+          return;
+        }
+        posterUrl = await uploadPoster(_posterImage!);
+      }
+
+      await Supabase.instance.client.from('konser').insert({
+        'nama_konser': _namaKonserController.text,
+        'tanggal': _tanggalController.text,
+        'lokasi': _lokasiController.text,
+        'artist': _artistController.text,
+        'deskripsi': _deskripsiController.text,
+        'poster_url': posterUrl ?? '',
+      });
+
+      setState(() => isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Konser berhasil disimpan!')),
+      );
+      Navigator.pop(context);
     }
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
+import '../organizer/manage_konser.dart';
 
 class OrganizerHomeScreen extends StatefulWidget {
   const OrganizerHomeScreen({Key? key}) : super(key: key);
@@ -10,43 +13,25 @@ class OrganizerHomeScreen extends StatefulWidget {
 
 class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> concerts = [];
+  bool isLoading = true;
 
-  final List<Map<String, String>> concerts = [
-    {
-      'title': 'Sisforia : TGIF!\nSisforia',
-      'date': 'Sunday, 10 November 2024',
-      'venue': 'Jatim International Expo (JIE)',
-      'sold': 'Sold 183/200',
-      'image': 'organizer/concert1.png',
-      'rating': 'Rating (5.0)',
-    },
-    {
-      'title': 'EXSIST 2.0\nBernadya',
-      'date': 'Thursday, 12 December 2024',
-      'venue': 'Balai Pemuda Surabaya',
-      'sold': 'Sold : 115/300',
-      'image': 'organizer/concert2.png',
-      'rating': 'Rating (5.0)',
-    },
-    {
-      'title': 'Onfest 2024\nTipe-X, Juicy Luicy, dll',
-      'date': 'Saturday, 30 November 2024',
-      'venue': 'PTC Surabaya',
-      'sold': 'Sold : 285/300',
-      'image': 'organizer/concert3.png',
-      'rating': 'Rating (5.0)',
-    },
-    {
-      'title': 'Buzz Youth Fest\nSheila On 7, RAN, dll',
-      'date': 'Saturday, 25 January 2025',
-      'venue': 'Lap. Bhumi Marinir Karangpilang, Surabaya',
-      'sold': 'Sold : 310/400',
-      'image': 'organizer/concert4.png',
-      'rating': 'Rating (5.0)',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchConcerts();
+  }
 
-  String _searchText = '';
+  Future<void> fetchConcerts() async {
+    final response = await Supabase.instance.client
+        .from('konser')
+        .select()
+        .order('tanggal', ascending: true);
+    setState(() {
+      concerts = List<Map<String, dynamic>>.from(response);
+      isLoading = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -54,11 +39,11 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
     super.dispose();
   }
 
-  List<Map<String, String>> get _filteredConcerts {
-    if (_searchText.isEmpty) return concerts;
+  List<Map<String, dynamic>> get _filteredConcerts {
+    if (_searchController.text.isEmpty) return concerts;
     return concerts.where((concert) {
-      final title = concert['title']!.toLowerCase();
-      return title.contains(_searchText.toLowerCase());
+      final title = (concert['nama_konser'] ?? '').toLowerCase();
+      return title.contains(_searchController.text.toLowerCase());
     }).toList();
   }
 
@@ -201,9 +186,7 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
-                      setState(() {
-                        _searchText = value;
-                      });
+                      setState(() {});
                     },
                   ),
                 ),
@@ -224,6 +207,9 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   }
 
   Widget _buildConcertList() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     final filteredConcerts = _filteredConcerts;
     if (filteredConcerts.isEmpty) {
       return const Center(
@@ -241,29 +227,50 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
       itemCount: filteredConcerts.length,
       itemBuilder: (context, index) {
         final concert = filteredConcerts[index];
-        return _buildConcertCard(
-          title: concert['title']!,
-          date: concert['date']!,
-          venue: concert['venue']!,
-          sold: concert['sold']!,
-          imagePath: concert['image']!,
-          rating: concert['rating']!,
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ManageKonserScreen(konser: concert),
+              ),
+            );
+          },
+          child: _buildConcertCard(
+            title: concert['nama_konser'] ?? '',
+            date: concert['tanggal']?.toString() ?? '',
+            venue: concert['lokasi'] ?? '',
+            artist: concert['artist'] ?? '',
+            posterUrl: concert['poster_url'] ?? '',
+            sold: 'Sold 183/200', // dummy
+            rating: 'Rating (5.0)', // dummy
+          ),
         );
       },
     );
+  }
+
+  // Fungsi untuk format tanggal
+  String formatTanggal(String tanggal) {
+    try {
+      final date = DateTime.parse(tanggal);
+      return DateFormat('EEEE, dd MMMM yyyy')
+          .format(date); // Sunday, 10 November 2024
+    } catch (_) {
+      return tanggal;
+    }
   }
 
   Widget _buildConcertCard({
     required String title,
     required String date,
     required String venue,
+    required String artist,
+    required String posterUrl,
     required String sold,
-    required String imagePath,
     required String rating,
   }) {
     return Container(
-      width: 333,
-      height: 150,
       margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -271,9 +278,9 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
           color: const Color(0xFF00FFB3),
           width: 2,
         ),
-        image: imagePath.isNotEmpty
+        image: posterUrl.isNotEmpty
             ? DecorationImage(
-                image: AssetImage(imagePath),
+                image: NetworkImage(posterUrl),
                 fit: BoxFit.cover,
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.4),
@@ -287,54 +294,77 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return const LinearGradient(
-                  colors: [Color(0xFF22E6CE), Color(0xFF10FF8C)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(bounds);
-              },
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 17.77,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  height: 1.2,
-                ),
+            // Nama Konser
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF22E6CE),
+                height: 1.2,
+              ),
+            ),
+            // Artist (style sama dengan title)
+            Text(
+              artist,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF22E6CE),
+                height: 1.2,
               ),
             ),
             const SizedBox(height: 8),
+            // Tanggal (format panjang)
             Text(
-              '$date\n$venue\n$sold',
+              formatTanggal(date),
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 10,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF32BDAC),
-                height: 1.4,
+                color: Color(0xFFC8EFF8),
               ),
             ),
-            const SizedBox(height: 4),
+            // Lokasi
+            Text(
+              venue,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC8EFF8),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Sold
+            Text(
+              sold,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC8EFF8),
+              ),
+            ),
+            // Rating
             Row(
               children: [
                 Text(
                   rating,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF32BDAC),
+                    color: Color(0xFFC8EFF8),
                   ),
                 ),
-                const Icon(
-                  Icons.star,
-                  color: Color(0xFFFFD700),
-                  size: 8,
-                ),
                 const SizedBox(width: 4),
+                ...List.generate(
+                    5,
+                    (index) => const Icon(Icons.star,
+                        color: Color(0xFFFFD700), size: 16)),
               ],
             ),
           ],
