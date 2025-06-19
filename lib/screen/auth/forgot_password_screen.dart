@@ -1,0 +1,1 @@
+//ga ush pake aja bang kwkwk

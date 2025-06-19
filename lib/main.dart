@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screen/buyer/my_ticket.dart';
 import 'screen/buyer/home_screen.dart';
 import 'screen/buyer/concert_detail.dart';
 import 'screen/buyer/concert_detail_completed.dart';
+import 'screen/auth/register_screen.dart' as signUpPage;
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+      url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw');
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,8 +25,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: Scaffold(
-      backgroundColor: Color(0xFF111317),
-      body: HomeScreen(),
+        backgroundColor: Color(0xFF111317),
+        body: signUpPage.SignupScreen(),
       ),
       // home: MyHomePage(title: 'Flutter Demo Home Page'),
       // home: HomeScreen(),
