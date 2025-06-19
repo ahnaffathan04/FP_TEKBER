@@ -1,5 +1,6 @@
 // Importing necessary packages
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Importing necessary screens
@@ -227,11 +228,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   : const Text('Sign Up', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
             ),
             TextButton(
-              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen())),
+              onPressed: () => context.go('/login'),
               child: const Text('Already have an account? Login', style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
             TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SubmitComplaintScreen())),
+              onPressed: () => context.go('/complaint'),
               child: const Text('Laporkan masalah di sini', style: TextStyle(fontSize: 16, color: Colors.red)),
             )
           ],
