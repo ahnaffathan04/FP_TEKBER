@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Importing necessary screens
 import 'login_screen.dart';
-import '../complaint/submit_complaint.dart';
 import '../constants/app_colors.dart';
 
 
@@ -57,17 +56,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
     final userName = _userNameController.text.trim();
-    final userCategory = _userCategoryController.text.trim();
+    final userCategory = _userCategoryController.text.trim().toLowerCase();
     final userAddress = _userAddressController.text.trim();
     final profilePicture = _profilePictureController.text.trim();
     final dateOfBirth = _dateOfBirthController.text.trim();
 
-    if ([email, name, phone, password, confirmPassword, userName, userCategory, userAddress, profilePicture, dateOfBirth].any((element) => element.isEmpty)) {
+    if ([email, name, phone, password, confirmPassword, userName, userCategory, userAddress, profilePicture, dateOfBirth].any((e) => e.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Harap isi semua detail"), backgroundColor: Colors.red),
       );
       return;
     }
+
+    if (userCategory != 'buyer' && userCategory != 'organizer') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Kategori pengguna hanya boleh 'buyer' atau 'organizer'"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Password tidak cocok"), backgroundColor: Colors.red),
@@ -75,25 +82,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+\$');
-    final phoneRegex = RegExp(r'^\d+\$');
-    final dateRegex = RegExp(r'^\d{4}-\d{2}-\d{2}\$');
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    final phoneRegex = RegExp(r'^\d+$');
+    final parsedDate = DateTime.tryParse(dateOfBirth);
     final urlRegex = RegExp(r'^(http|https)://');
 
     if (!emailRegex.hasMatch(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Format email tidak valid"), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Format email tidak valid"), backgroundColor: Colors.red),
+      );
       return;
     }
+
     if (!phoneRegex.hasMatch(phone)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Nomor telepon hanya boleh angka"), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Nomor telepon hanya boleh angka"), backgroundColor: Colors.red),
+      );
       return;
     }
-    if (!dateRegex.hasMatch(dateOfBirth)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tanggal lahir harus format YYYY-MM-DD"), backgroundColor: Colors.red));
+
+    if (parsedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Tanggal lahir tidak valid atau salah format (YYYY-MM-DD)"),
+        backgroundColor: Colors.red,
+      ));
       return;
     }
+    if (parsedDate.isAfter(DateTime.now())) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Tanggal lahir tidak boleh di masa depan"),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
     if (!urlRegex.hasMatch(profilePicture)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Link foto profil harus berupa URL valid (http/https)"), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Link foto profil harus berupa URL valid (http/https)"), backgroundColor: Colors.red),
+      );
       return;
     }
 
@@ -126,17 +152,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final response = await supabase.from('profiles').upsert(profileData).select();
 
         if (response.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Pendaftaran berhasil!"), backgroundColor: Colors.green));
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Pendaftaran berhasil!"), backgroundColor: Colors.green),
+          );
+          context.go('/login');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data profil tidak berhasil disimpan."), backgroundColor: Colors.orange));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Data profil tidak berhasil disimpan."), backgroundColor: Colors.orange),
+          );
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Gagal: $e"), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal: $e"), backgroundColor: Colors.red),
+      );
     }
+
     setState(() => isLoading = false);
   }
+
 
   Widget _buildInputField(String label, TextEditingController controller, {bool obscure = false, Widget? suffixIcon}) {
     return TextField(
@@ -225,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               child: isLoading
                   ? const CircularProgressIndicator()
-                  : const Text('Sign Up', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                  : const Text('Register', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
             ),
             TextButton(
               onPressed: () => context.go('/login'),

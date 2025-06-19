@@ -206,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(color: Colors.white70),
                 ),
                 TextButton(
-                  onPressed: () => context.push('/signup'),
+                  onPressed: () => context.go('/register'),
                   child: const Text(
                     'Register',
                     style: TextStyle(
