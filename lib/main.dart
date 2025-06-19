@@ -1,46 +1,45 @@
-import 'package:flutter/material.dart'; // Importing Flutter Material package for UI components
-import 'package:go_router/go_router.dart'; // Importing GoRouter for navigation
-import 'package:supabase_flutter/supabase_flutter.dart'; // Importing Supabase for backend 
-
-// Constants Screens
-import 'screen/constants/app_colors.dart'; // Importing AppColors for consistent theming
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Auth Screens
-import 'screen/auth/register_screen.dart'; // Importing RegisterScreen for user registration
-import 'screen/auth/login_screen.dart'; // Importing LoginScreen for user login
+import 'screen/auth/register_screen.dart';
+import 'screen/auth/login_screen.dart';
 
 // Buyer Screens
-import 'screen/buyer/home_screen.dart'; // Importing HomeScreen for Buyer
-import 'screen/buyer/account.dart'; // Importing AccountScreen for Buyer
-import 'screen/buyer/page_setting.dart'; // Importing PageSetting for Buyer
-import 'screen/buyer/my_ticket.dart'; // Importing MyTicketScreen for Buyer
-import 'screen/buyer/concert_detail.dart'; // Importing ConcertDetailScreen for Buyer
-import 'screen/buyer/concert_detail_completed.dart'; // Importing ConcertDetailCompleted for Buyer
+import 'screen/buyer/home_screen.dart';
+import 'screen/buyer/account.dart';
+import 'screen/buyer/page_setting.dart';
+import 'screen/buyer/my_ticket.dart';
+import 'screen/buyer/concert_detail.dart';
+import 'screen/buyer/concert_detail_completed.dart';
 
 // Organizer Screens
-import 'screen/organizer/home_screen.dart'; // Importing OrganizerHomeScreen for Organizer
-import 'screen/organizer/manage_tiket.dart'; // Importing ManageTiketScreen for Organizer
-import 'screen/organizer/manage_konser.dart'; // Importing ManageKonserScreen for Organizer
-import 'screen/organizer/edit_konser.dart'; // Importing EditKonserScreen for Organizer
-import 'screen/organizer/tambah_tiket.dart'; //  Importing TambahTiketScreen for Organizer
+import 'screen/organizer/home_screen.dart';
+import 'screen/organizer/manage_tiket.dart';
+import 'screen/organizer/tambah_tiket.dart';
+import 'screen/organizer/manage_konser.dart';
+import 'screen/organizer/edit_konser.dart';
+
+// Complaint Screens
+import 'screen/complaint/submit_complaint.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
-    url: '', // Insert your Supabase URL
-    anonKey: '', // Insert your Supabase anon key
+    url: '',
+    anonKey: '',
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-// GoRouter Configuration
 final GoRouter _router = GoRouter(
-  initialLocation: '/choose-role',
+  initialLocation: '/register',
   routes: [
-    // Common entry screen
+    // Choose Role Route
     GoRoute(
       path: '/choose-role',
-      builder: (context, state) => ChooseRoleScreen(),
+      builder: (context, state) => const ChooseRoleScreen(),
     ),
 
     // Auth Routes
@@ -78,24 +77,22 @@ final GoRouter _router = GoRouter(
       path: '/concert/detail/completed',
       builder: (context, state) => ConcertDetailCompleted(),
     ),
-
+    
     // Organizer Routes
     GoRoute(
       path: '/organizer-home',
       builder: (context, state) => OrganizerHomeScreen(),
     ),
-    // GoRoute(
-    //   path: '/tambah-konser',
-    //   builder: (context, state) => TambahKonserScreen(),
-    // ),
-    // GoRoute(
-    //   path: '/tambah-tiket',
-    //   builder: (context, state) => const TambahTiketScreen(),
-    // ),
+    GoRoute(
+      path: '/complaint',
+      builder: (context, state) => const SubmitComplaintScreen(),
+    ),
   ],
 );
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -107,8 +104,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Entry screen to choose between buyer/organizer
 class ChooseRoleScreen extends StatelessWidget {
+  const ChooseRoleScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,12 +117,12 @@ class ChooseRoleScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () => context.go('/buyer-home'),
-              child: Text('Buyer Mode'),
+              child: const Text('Buyer Mode'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => context.go('/organizer-home'),
-              child: Text('Organizer Mode'),
+              child: const Text('Organizer Mode'),
             ),
           ],
         ),
