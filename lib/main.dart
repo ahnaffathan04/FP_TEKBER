@@ -2,6 +2,13 @@ import 'package:flutter/material.dart'; // Importing Flutter Material package fo
 import 'package:go_router/go_router.dart'; // Importing GoRouter for navigation
 import 'package:supabase_flutter/supabase_flutter.dart'; // Importing Supabase for backend 
 
+// Constants Screens
+import 'screen/constants/app_colors.dart'; // Importing AppColors for consistent theming
+
+// Auth Screens
+import 'screen/auth/register_screen.dart'; // Importing RegisterScreen for user registration
+import 'screen/auth/login_screen.dart'; // Importing LoginScreen for user login
+
 // Buyer Screens
 import 'screen/buyer/home_screen.dart'; // Importing HomeScreen for Buyer
 import 'screen/buyer/account.dart'; // Importing AccountScreen for Buyer
@@ -36,6 +43,16 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => ChooseRoleScreen(),
     ),
 
+    // Auth Routes
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => LoginScreen(),
+    ),
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => RegisterScreen(),
+    ),
+    
     // Buyer Routes
     GoRoute(
       path: '/buyer-home',
@@ -70,10 +87,10 @@ final GoRouter _router = GoRouter(
     // GoRoute(
     //   path: '/tambah-konser',
     //   builder: (context, state) => TambahKonserScreen(),
-    // // ),
+    // ),
     // GoRoute(
     //   path: '/tambah-tiket',
-    //   builder: (context, state) => TambahTiketScreen(),
+    //   builder: (context, state) => const TambahTiketScreen(),
     // ),
   ],
 );
