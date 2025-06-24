@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Auth Screens
+// Screens
 import 'screen/auth/register_screen.dart';
 import 'screen/auth/login_screen.dart';
-
-// Buyer Screens
 import 'screen/buyer/home_screen.dart';
 import 'screen/buyer/account.dart';
 import 'screen/buyer/page_setting.dart';
@@ -24,13 +23,25 @@ import 'screen/organizer/edit_konser.dart';
 // Complaint Screens
 import 'screen/complaint/submit_complaint.dart';
 
+// Providers
+import 'screen/buyer/providers/user_provider.dart';
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // Must be first
+
   await Supabase.initialize(
-    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw',
+    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',  // 🔁 Replace with your Supabase URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
   );
-  runApp(const MyApp());
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 final GoRouter _router = GoRouter(
@@ -62,7 +73,7 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => PageSetting(),
     ),
     GoRoute(
-      path: '/buyer-home/account',
+      path: '/buyer-home/setting/account',
       builder: (context, state) => AccountScreen(),
     ),
     GoRoute(
@@ -83,6 +94,24 @@ final GoRouter _router = GoRouter(
       path: '/organizer-home',
       builder: (context, state) => OrganizerHomeScreen(),
     ),
+    // GoRoute(
+    //   path: '/manage-tiket',
+    //   builder: (context, state) => ManageTiketScreen(),
+    // ),
+    // GoRoute(
+    //   path: '/tambah-tiket',
+    //   builder: (context, state) => TambahTiketScreen(),
+    // ),
+    // GoRoute(
+    //   path: '/manage-konser',
+    //   builder: (context, state) => ManageKonserScreen(),
+    // ),
+    // GoRoute(
+    //   path: '/edit-konser',
+    //   builder: (context, state) => EditKonserScreen(),
+    // ),
+
+    // Complaint Routes
     GoRoute(
       path: '/complaint',
       builder: (context, state) => const SubmitComplaintScreen(),
@@ -96,9 +125,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'FestiPass App',
-      theme: ThemeData.dark(),
       routerConfig: _router,
+      title: 'FestiPass App',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF111317),
+      ),
       debugShowCheckedModeBanner: false,
     );
   }

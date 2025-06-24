@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class AppColors {
-  static const Color background = Color(0xFF111317);
-  static const Color accent = Color(0xFFFF9500);
-  static const Color highlight = Color(0xFFC105FF);
-  static const Color card = Color(0xFF292B3D);
-  static const Color search = Color(0xFFD9D9D9);
-  static const Color locationText = Color(0xFFC8EFF8);
-  static const Color settingsBorder = Color(0xFF545C8D);
-  static const Color logoutColor = Color(0xFFFF6B6B);
-  static const Color inactiveIcon = Color(0xFF595C8C);
-}
+import '../constants/app_colors.dart';
 
 class PageSetting extends StatefulWidget {
+  const PageSetting({super.key});
+
   @override
   _PageSettingState createState() => _PageSettingState();
 }
@@ -30,9 +22,8 @@ class _PageSettingState extends State<PageSetting> {
       context.go('/buyer-home');
     } else if (index == 1) {
       context.go('/myticket');
-    } else if (index == 2) {
-      // stay on settings
     }
+    // index == 2 stays on settings
   }
 
   @override
@@ -46,12 +37,12 @@ class _PageSettingState extends State<PageSetting> {
             _buildHeader(),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
                     _buildSettingsMenu(),
-                    Spacer(),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -75,7 +66,7 @@ class _PageSettingState extends State<PageSetting> {
   }
 
   Widget _buildStatusBar() {
-    return Padding(
+    return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,39 +75,85 @@ class _PageSettingState extends State<PageSetting> {
           Row(
             children: [
               Row(
-                children: List.generate(4, (index) => Container(
-                  width: 4,
-                  height: 12,
-                  margin: EdgeInsets.only(right: 2),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(1)),
-                )),
+              children: [
+                SizedBox(width: 2.0),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  ),
+                  child: SizedBox(width: 4.0, height: 12.0),
+                ),
+                SizedBox(width: 2.0),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  ),
+                  child: SizedBox(width: 4.0, height: 12.0),
+                ),
+                SizedBox(width: 2.0),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  ),
+                  child: SizedBox(width: 4.0, height: 12.0),
+                ),
+                SizedBox(width: 2.0),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  ),
+                  child: SizedBox(width: 4.0, height: 12.0),
+                ),
+              ],
               ),
               SizedBox(width: 4),
               Icon(Icons.wifi, color: Colors.white, size: 16),
               SizedBox(width: 4),
               Stack(
                 children: [
-                  Container(
+                  SizedBox(
                     width: 24,
                     height: 12,
-                    decoration: BoxDecoration(border: Border.all(color: Colors.white), borderRadius: BorderRadius.circular(2)),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.fromBorderSide(BorderSide(color: Colors.white)),
+                        borderRadius: BorderRadius.all(Radius.circular(2)),
+                      ),
+                    ),
                   ),
                   Positioned(
                     left: 2,
                     top: 2,
-                    child: Container(
+                    child: SizedBox(
                       width: 16,
                       height: 8,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(1)),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(1)),
+                        ),
+                      ),
                     ),
                   ),
                   Positioned(
                     right: -2,
                     top: 4,
-                    child: Container(
+                    child: SizedBox(
                       width: 2,
                       height: 4,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.only(topRight: Radius.circular(1), bottomRight: Radius.circular(1))),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(1),
+                            bottomRight: Radius.circular(1),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -130,15 +167,18 @@ class _PageSettingState extends State<PageSetting> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Icon(Icons.chevron_left, color: AppColors.highlight, size: 24),
           ),
-          SizedBox(width: 16),
-          Text("Settings", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 16),
+          const Text(
+            "Settings",
+            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
@@ -146,12 +186,15 @@ class _PageSettingState extends State<PageSetting> {
 
   Widget _buildSettingsMenu() {
     return Container(
-      decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         children: [
-          _buildSettingsItem(title: "Account", onTap: () => Navigator.pushNamed(context, '/homebuyer/pagesetting/account'), showChevron: true),
+          _buildSettingsItem(title: "Account", onTap: () => context.push('/buyer-home/setting/account')),
           Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
-          _buildSettingsItem(title: "Language", onTap: () => print("Language tapped"), showChevron: true),
+          _buildSettingsItem(title: "Language", onTap: () => debugPrint("Language tapped")),
           Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
           _buildSettingsItem(title: "Logout", onTap: _showLogoutDialog, isLogout: true),
         ],
@@ -159,16 +202,33 @@ class _PageSettingState extends State<PageSetting> {
     );
   }
 
-  Widget _buildSettingsItem({required String title, required VoidCallback onTap, bool showChevron = false, bool isLogout = false}) {
+  Widget _buildSettingsItem({
+    required String title,
+    required VoidCallback onTap,
+    bool showChevron = false,
+    bool isLogout = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: TextStyle(color: isLogout ? AppColors.logoutColor : Colors.white, fontSize: 18, fontWeight: FontWeight.w400)),
-            if (showChevron) Icon(Icons.chevron_right, color: Color(0xFFDADADA), size: 20),
+            Text(
+              title,
+              style: TextStyle(
+                color: isLogout ? AppColors.logoutColor : Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            if (showChevron)
+              Icon(
+                Icons.chevron_right,
+                color: const Color(0xFFDADADA),
+                size: 20,
+              ),
           ],
         ),
       ),
@@ -178,20 +238,20 @@ class _PageSettingState extends State<PageSetting> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           backgroundColor: AppColors.card,
-          title: Text("Logout", style: TextStyle(color: Colors.white)),
-          content: Text("Are you sure you want to logout?", style: TextStyle(color: Colors.white70)),
+          title: const Text("Logout", style: TextStyle(color: Colors.white)),
+          content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.white70)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: Navigator.of(context).pop,
               child: Text("Cancel", style: TextStyle(color: AppColors.highlight)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                print("User logged out");
+                debugPrint("User logged out");
               },
               child: Text("Logout", style: TextStyle(color: AppColors.logoutColor)),
             ),
