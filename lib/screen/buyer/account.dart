@@ -121,24 +121,6 @@ class _AccountScreenState extends State<AccountScreen> {
                 ],
               ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF151623),
-        selectedItemColor: AppColors.highlight,
-        unselectedItemColor: AppColors.inactiveIcon,
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 0) {
-            context.go('/buyer-home');
-          } else if (index == 1) {
-            context.go('/myticket');
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
-      ),
     );
   }
 
@@ -481,109 +463,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void _showPasswordChangeDialog() {
-    TextEditingController currentPasswordController = TextEditingController();
-    TextEditingController newPasswordController = TextEditingController();
-    TextEditingController confirmPasswordController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColors.card,
-          title: const Text(
-            "Change Password",
-            style: TextStyle(color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: currentPasswordController,
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "Current Password",
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: newPasswordController,
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "New Password",
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "Confirm New Password",
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: AppColors.inactiveIcon),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                if (newPasswordController.text == confirmPasswordController.text &&
-                    newPasswordController.text.isNotEmpty) {
-                  // TODO: Implement password change logic with Supabase if needed
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text("Password changed successfully"),
-                      backgroundColor: AppColors.highlight,
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text("Passwords don't match or are empty"),
-                      backgroundColor: AppColors.logoutColor,
-                    ),
-                  );
-                }
-              },
-              child: Text(
-                "Change",
-                style: TextStyle(color: AppColors.highlight),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    context.push('/change-password');
   }
 }

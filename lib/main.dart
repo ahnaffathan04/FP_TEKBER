@@ -3,11 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Screens
-import 'screen/auth/register_screen.dart';
+// Auth Screens
 import 'screen/auth/login_screen.dart';
+import 'screen/auth/register_screen.dart';
+import 'screen/auth/change_password.dart';
+
 import 'screen/buyer/home_screen.dart';
 import 'screen/buyer/account.dart';
+import 'screen/buyer/language.dart';
 import 'screen/buyer/page_setting.dart';
 import 'screen/buyer/my_ticket.dart';
 import 'screen/buyer/concert_detail.dart';
@@ -62,6 +65,10 @@ final GoRouter _router = GoRouter(
       path: '/register',
       builder: (context, state) => RegisterScreen(),
     ),
+    GoRoute(
+      path: '/change-password',
+      builder: (context, state) => ChangePasswordScreen(),
+    ),
     
     // Buyer Routes
     GoRoute(
@@ -75,6 +82,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/buyer-home/setting/account',
       builder: (context, state) => AccountScreen(),
+    ),
+    GoRoute(
+      path: '/buyer-home/setting/language',
+      builder: (context, state) => LanguageScreen(),
     ),
     GoRoute(
       path: '/myticket',

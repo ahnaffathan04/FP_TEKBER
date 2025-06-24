@@ -170,10 +170,6 @@ class _PageSettingState extends State<PageSetting> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.chevron_left, color: AppColors.highlight, size: 24),
-          ),
           const SizedBox(width: 16),
           const Text(
             "Settings",
@@ -194,7 +190,7 @@ class _PageSettingState extends State<PageSetting> {
         children: [
           _buildSettingsItem(title: "Account", onTap: () => context.push('/buyer-home/setting/account')),
           Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
-          _buildSettingsItem(title: "Language", onTap: () => debugPrint("Language tapped")),
+          _buildSettingsItem(title: "Language", onTap: () => context.push("/buyer-home/setting/language")),
           Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
           _buildSettingsItem(title: "Logout", onTap: _showLogoutDialog, isLogout: true),
         ],

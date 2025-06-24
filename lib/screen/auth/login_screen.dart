@@ -155,10 +155,10 @@ class _LoginScreenState extends State<LoginScreen> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-                  context.push('/forgot_password_step1');
+                  context.push('');
                 },
                 child: const Text(
-                  'Forgot Password?',
+                  'Forgot Password?', 
                   style: TextStyle(color: AppColors.bluishCyan),
                 ),
               ),

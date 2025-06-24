@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Importing necessary screens
-import 'login_screen.dart';
 import '../constants/app_colors.dart';
 
 
