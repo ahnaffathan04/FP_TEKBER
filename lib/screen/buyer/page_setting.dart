@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class AppColors {
   static const Color background = Color(0xFF111317);
@@ -26,9 +27,9 @@ class _PageSettingState extends State<PageSetting> {
     });
 
     if (index == 0) {
-      Navigator.pushNamedAndRemoveUntil(context, '/homebuyer', (route) => false);
+      context.go('/buyer-home');
     } else if (index == 1) {
-      Navigator.pushNamedAndRemoveUntil(context, '/myticket', (route) => false);
+      context.go('/myticket');
     } else if (index == 2) {
       // stay on settings
     }

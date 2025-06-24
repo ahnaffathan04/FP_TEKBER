@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-
 
 class MyTicketScreen extends StatelessWidget {
   const MyTicketScreen({super.key});
@@ -156,9 +156,9 @@ class MyTicketScreen extends StatelessWidget {
         currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushNamedAndRemoveUntil(context, '/homebuyer', (route) => false);
+            context.go('/buyer-home');
           } else if (index == 2) {
-            Navigator.pushNamed(context, '/homebuyer/setting');
+            context.go('/buyer-home/setting');
           }
         },
         items: const [
