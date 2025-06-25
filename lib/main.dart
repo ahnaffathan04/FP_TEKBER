@@ -1,114 +1,211 @@
 import 'package:flutter/material.dart';
-import 'screen/buyer/my_ticket.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+// Auth Screens
+import 'screen/auth/login_screen.dart';
+import 'screen/auth/register_screen.dart';
+import 'screen/auth/change_password.dart';
+
+// Buyer Screens
 import 'screen/buyer/home_screen.dart';
+import 'screen/buyer/account.dart';
+import 'screen/buyer/language.dart';
+import 'screen/buyer/page_setting.dart';
+import 'screen/buyer/my_ticket.dart';
 import 'screen/buyer/concert_detail.dart';
 import 'screen/buyer/concert_detail_completed.dart';
 
-void main() {
-  runApp(MyApp());
+// Organizer Screens
+import 'screen/organizer/home_screen.dart';
+import 'screen/organizer/manage_tiket.dart' as manage_tiket;
+import 'screen/organizer/tambah_tiket.dart';
+import 'screen/organizer/manage_konser.dart';
+import 'screen/organizer/edit_konser.dart';
+import 'screen/organizer/page_setting_organizer.dart';
+import 'screen/organizer/account_organizer.dart';
+import 'screen/organizer/language_organizer.dart';
+
+
+// Complaint Screens
+import 'screen/complaint/submit_complaint.dart';
+
+// Providers
+import 'screen/buyer/providers/user_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Must be first
+
+  await Supabase.initialize(
+    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',  // 🔁 Replace with your Supabase URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
+  );
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
+final GoRouter _router = GoRouter(
+  initialLocation: '/register',
+  routes: [
+    // Choose Role Route
+    GoRoute(
+      path: '/choose-role',
+      builder: (context, state) => const ChooseRoleScreen(),
+    ),
+
+    // Auth Routes
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => LoginScreen(),
+    ),
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/change-password',
+      builder: (context, state) => ChangePasswordScreen(),
+    ),
+    
+    // Buyer Routes
+    GoRoute(
+      path: '/buyer-home',
+      builder: (context, state) => HomeScreen(),
+    ),
+    GoRoute(
+      path: '/buyer-home/setting',
+      builder: (context, state) => PageSetting(),
+    ),
+    GoRoute(
+      path: '/buyer-home/setting/account',
+      builder: (context, state) => AccountScreen(),
+    ),
+    GoRoute(
+      path: '/buyer-home/setting/language',
+      builder: (context, state) => LanguageScreen(),
+    ),
+    GoRoute(
+      path: '/myticket',
+      builder: (context, state) => MyTicketScreen(),
+    ),
+    GoRoute(
+      path: '/concert/detail',
+      builder: (context, state) => ConcertDetailScreen(),
+    ),
+    GoRoute(
+      path: '/concert/detail/completed',
+      builder: (context, state) => ConcertDetailCompleted(),
+    ),
+    
+    // Organizer Routes
+    GoRoute(
+      path: '/organizer-home',
+      builder: (context, state) => OrganizerHomeScreen(),
+    ),
+        GoRoute(
+      path: '/organizer-home/setting',
+      builder: (context, state) => OrganizerPageSetting(),
+    ),
+    GoRoute(
+      path: '/organizer-home/setting/account_organizer',
+      builder: (context, state) => OrganizerAccountScreen(),
+    ),
+        GoRoute(
+      path: '/organizer-home/setting/language_organizer',
+      builder: (context, state) => OrganizerLanguageScreen(),
+    ),
+    GoRoute(
+      path: '/organizer-home/manage-konser',
+      builder: (context, state) {
+        final concertTable = state.extra as Map<String, dynamic>?;
+        if (concertTable == null) {
+          return const Scaffold(
+            body: Center(child: Text('No concert data provided.')),
+          );
+        }
+        return ManageKonserScreen(concert_table: concertTable);
+      },
+    ),
+    GoRoute(
+      path: '/organizer-home/tambah-tiket',
+      builder: (context, state) {
+        final concertTable = state.extra as Map<String, dynamic>?;
+        if (concertTable == null) {
+          return const Scaffold(
+            body: Center(child: Text('No concert data provided.')),
+          );
+        }
+        return TambahTiketScreen(concert_table: concertTable);
+      },
+    ),
+    GoRoute(
+      path: '/edit-konser',
+      builder: (context, state) {
+        final concertTable = state.extra as Map<String, dynamic>?;
+        if (concertTable == null) {
+          return const Scaffold(
+            body: Center(child: Text('No concert data provided.')),
+          );
+        }
+        return EditKonserScreen(concert_table: concertTable);
+      },
+    ),
+
+    // Complaint Routes
+    GoRoute(
+      path: '/complaint',
+      builder: (context, state) => const SubmitComplaintScreen(),
+    ),
+  ],
+);
+
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: Scaffold(
-      backgroundColor: Color(0xFF111317),
-      body: HomeScreen(),
+    return MaterialApp.router(
+      routerConfig: _router,
+      title: 'FestiPass App',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF111317),
       ),
-      // home: MyHomePage(title: 'Flutter Demo Home Page'),
-      // home: HomeScreen(),
-      // home: ConcertDetailScreen(),
-      // home: MyTicketScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class ChooseRoleScreen extends StatelessWidget {
+  const ChooseRoleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      backgroundColor: const Color(0xFF111317),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+          children: [
+            ElevatedButton(
+              onPressed: () => context.go('/buyer-home'),
+              child: const Text('Buyer Mode'),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => context.go('/organizer-home'),
+              child: const Text('Organizer Mode'),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
