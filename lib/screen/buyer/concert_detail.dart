@@ -38,7 +38,7 @@ class ConcertDetailScreen extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       foreground: Paint()
-                        ..shader = LinearGradient(
+                        ..shader = const LinearGradient(
                           colors: [Colors.white, Color(0xFFC105FF)],
                         ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
                     ),
@@ -66,7 +66,6 @@ class ConcertDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Purchase Info Box
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF1D1E2D),
@@ -80,10 +79,7 @@ class ConcertDetailScreen extends StatelessWidget {
                         InfoRow(label: 'Payment Method', value: 'DANA'),
                         InfoRow(label: 'Total Price', value: 'Rp280.000,00 (x3 Tickets)'),
                         SizedBox(height: 12),
-                        Text(
-                          'Your Seat',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
+                        Text('Your Seat', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         SizedBox(height: 6),
                         Text('VIP A4\nVIP A5\nCAT1 B5', style: TextStyle(color: Colors.white)),
                       ],
@@ -91,7 +87,6 @@ class ConcertDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Event Details Title
                   const Text(
                     'Event Details',
                     style: TextStyle(
@@ -101,8 +96,6 @@ class ConcertDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Event Details Box
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF1D1E2D),
@@ -116,10 +109,7 @@ class ConcertDetailScreen extends StatelessWidget {
                         InfoRow(label: 'Venue', value: 'Jatim International Expo (JIE)'),
                         InfoRow(label: 'Lineup', value: 'Sisforia'),
                         SizedBox(height: 12),
-                        Text(
-                          'Rundown :',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
+                        Text('Rundown :', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
                         Text(
                           '18.00 - 18.15   Opening\n'
@@ -132,7 +122,6 @@ class ConcertDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Feedback
                   const Text(
                     'Feedback',
                     style: TextStyle(
@@ -156,24 +145,17 @@ class ConcertDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Dashed line and QR
                   Center(
                     child: Column(
                       children: [
-                        // Garis putus-putus
                         Container(
                           width: double.infinity,
                           height: 1,
                           margin: const EdgeInsets.symmetric(vertical: 12),
-                          child: CustomPaint(
-                            painter: DashedLinePainter(),
-                          ),
+                          child: CustomPaint(painter: DashedLinePainter()),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Scan QR ketika di tempat',
-                          style: TextStyle(color: Color(0xFFC105FF)),
-                        ),
+                        const Text('Scan QR ketika di tempat', style: TextStyle(color: Color(0xFFC105FF))),
                         const SizedBox(height: 12),
                         Center(
                           child: Image.asset(
@@ -190,6 +172,26 @@ class ConcertDetailScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFF151623),
+        selectedItemColor: const Color(0xFFC105FF),
+        unselectedItemColor: Colors.white60,
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamedAndRemoveUntil(context, '/homebuyer', (route) => false);
+          } else if (index == 1) {
+            // Stay on current screen
+          } else if (index == 2) {
+            Navigator.pushNamed(context, '/homebuyer/setting');
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+        ],
       ),
     );
   }
@@ -211,11 +213,7 @@ class InfoRow extends StatelessWidget {
           Text(label, style: const TextStyle(color: Colors.white)),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: Text(value, textAlign: TextAlign.right, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -234,11 +232,7 @@ class DashedLinePainter extends CustomPainter {
 
     double startX = 0;
     while (startX < size.width) {
-      canvas.drawLine(
-        Offset(startX, 0),
-        Offset(startX + dashWidth, 0),
-        paint,
-      );
+      canvas.drawLine(Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
       startX += dashWidth + dashSpace;
     }
   }

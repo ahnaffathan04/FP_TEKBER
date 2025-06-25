@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class TambahTiketScreen extends StatefulWidget {
-  final dynamic concert_table;
-  const TambahTiketScreen({Key? key, required this.concert_table}) : super(key: key);
+  const TambahTiketScreen({Key? key}) : super(key: key);
 
   @override
   State<TambahTiketScreen> createState() => _TambahTiketScreenState();

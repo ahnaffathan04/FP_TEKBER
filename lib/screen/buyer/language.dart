@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart'; // Pastikan paket ini di-install
 
-class LanguageSelectionScreen extends StatefulWidget {
+class LanguageScreen extends StatefulWidget {
   @override
-  _LanguageSelectionScreenState createState() => _LanguageSelectionScreenState();
+  _LanguageScreenState createState() => _LanguageScreenState();
 }
 
-class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
+class _LanguageScreenState extends State<LanguageScreen> {
   String _selectedLanguage = "English";
+  String _headerText = "Language";
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 
@@ -100,7 +100,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
@@ -115,7 +115,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           ),
           SizedBox(width: 16),
           Text(
-            "Language",
+            _headerText,
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -140,11 +140,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     );
   }
 
-  Widget _buildLanguageOption(String language) {
+Widget _buildLanguageOption(String language) {
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedLanguage = language;
+          _headerText = (language == "Indonesia") ? "Bahasa" : "Language";
         });
       },
       child: Row(
@@ -182,29 +183,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               fontSize: 20,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigation() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Color(0xFF151623),
-        border: Border(
-          top: BorderSide(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Icon(LucideIcons.home, color: Color(0xFF595c8c), size: 24),
-          Icon(LucideIcons.gamepad2, color: Color(0xFF595c8c), size: 24),
-          Icon(LucideIcons.settings, color: Color(0xFF22e6ce), size: 24),
         ],
       ),
     );

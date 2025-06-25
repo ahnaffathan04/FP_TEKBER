@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-
 
 class MyTicketScreen extends StatelessWidget {
   const MyTicketScreen({super.key});
@@ -154,6 +154,13 @@ class MyTicketScreen extends StatelessWidget {
         selectedItemColor: const Color(0xFF10C7EF),
         unselectedItemColor: Colors.white60,
         currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            context.go('/buyer-home');
+          } else if (index == 2) {
+            context.go('/buyer-home/setting');
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
           BottomNavigationBarItem(icon: Icon(LucideIcons.ticket), label: ''),

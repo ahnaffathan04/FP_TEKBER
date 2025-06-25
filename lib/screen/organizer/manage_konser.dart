@@ -209,9 +209,6 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
               child: Text(
                 '• ${widget.concert_table['artist'] ?? ''}',
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
               ),

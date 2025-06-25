@@ -1,7 +1,97 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class HomeScreen extends StatelessWidget {
+class ConcertWithTicket {
+  final int concertId;
+  final String concertName;
+  final String concertDate;
+  final String location;
+  final int filled;
+  final int availability;
+  final String concertPoster;
+
+  ConcertWithTicket({
+    required this.concertId,
+    required this.concertName,
+    required this.concertDate,
+    required this.location,
+    required this.filled,
+    required this.availability,
+    required this.concertPoster,
+  });
+
+  factory ConcertWithTicket.fromMap(Map<String, dynamic> map) {
+    return ConcertWithTicket(
+      concertId: map['concert_id'],
+      concertName: map['concert_name'] ?? '',
+      concertDate: map['concert_date'] ?? '',
+      location: map['location'] ?? '',
+      filled: map['concert_ticket'] != null && map['concert_ticket'].isNotEmpty
+          ? map['concert_ticket'][0]['filled'] ?? 0
+          : 0,
+      availability: map['concert_ticket'] != null && map['concert_ticket'].isNotEmpty
+          ? map['concert_ticket'][0]['availability'] ?? 0
+          : 0,
+      concertPoster: map['concert_poster'] ?? '',
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<ConcertWithTicket>> concertListFuture;
+  final TextEditingController _searchController = TextEditingController();
+  List<ConcertWithTicket> _allConcerts = [];
+  List<ConcertWithTicket> _filteredConcerts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    concertListFuture = fetchConcerts();
+    concertListFuture.then((list) {
+      setState(() {
+        _allConcerts = list;
+        _filteredConcerts = list;
+      });
+    });
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredConcerts = _allConcerts.where((concert) {
+        return concert.concertName.toLowerCase().contains(query) ||
+            concert.concertDate.toLowerCase().contains(query) ||
+            concert.location.toLowerCase().contains(query);
+      }).toList();
+    });
+  }
+
+  Future<List<ConcertWithTicket>> fetchConcerts() async {
+    final response = await Supabase.instance.client
+        .from('concert_table')
+        .select('concert_id, concert_name, concert_date, location, concert_poster, concert_ticket(filled, availability)')
+        .order('concert_date', ascending: true);
+
+    return (response as List)
+        .map((item) => ConcertWithTicket.fromMap(item as Map<String, dynamic>))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,106 +117,89 @@ class HomeScreen extends StatelessWidget {
         ],
         currentIndex: 0,
         onTap: (index) {
-          // TODO: Implement navigation
+          if (index == 0) {
+            // Already on home
+          } else if (index == 1) {
+            context.go('/myticket');
+          } else if (index == 2) {
+            context.go('/buyer-home/setting');
+          }
         },
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: ListView(
-            children: [
-              // Header Logo + Profile
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: FutureBuilder<List<ConcertWithTicket>>(
+            future: concertListFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
+              }
+              final concertList = _filteredConcerts;
+              if (concertList.isEmpty) {
+                return const Center(child: Text('No concerts found.', style: TextStyle(color: Colors.white)));
+              }
+              return ListView(
                 children: [
-                  Text(
-                    'FestiPass',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      foreground: Paint()
-                        ..shader = const LinearGradient(
-                          colors: [Colors.pink, Color(0xFFC105FF)],
-                        ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                  // Header Logo + Profile
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'FestiPass',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..shader = const LinearGradient(
+                              colors: [Colors.pink, Color(0xFFC105FF)],
+                            ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                        ),
+                      ),
+                      const CircleAvatar(
+                        radius: 20,
+                        backgroundImage: AssetImage('assets/images/profile.jpg'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Search bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB9B9C3),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: _searchController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Search here..',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        border: InputBorder.none,
+                        icon: Icon(Icons.search, color: Colors.black54),
+                      ),
                     ),
                   ),
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage('assets/images/profile.jpg'),
-                  ),
+                  const SizedBox(height: 24),
+
+                  gradientTitle("All Concerts"),
+                  const SizedBox(height: 12),
+                  ...concertList.map((concert) => ConcertSimpleCard(
+                        concertName: concert.concertName,
+                        concertDate: concert.concertDate,
+                        location: concert.location,
+                        filled: concert.filled,
+                        availability: concert.availability,
+                        concertPoster: concert.concertPoster,
+                  )),
                 ],
-              ),
-              const SizedBox(height: 16),
-
-              // Search bar
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFB9B9C3), // Search bar color
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search here..',
-                    hintStyle: TextStyle(color: Colors.white70),
-                    border: InputBorder.none,
-                    icon: Icon(Icons.search, color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Filter location
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1D1E2D),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: const [
-                    Icon(Icons.location_on, color: Colors.white),
-                    SizedBox(width: 8),
-                    Text(
-                      'Surabaya',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    Spacer(),
-                    Icon(Icons.expand_more, color: Colors.white),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Filter chips
-              Wrap(
-                spacing: 10,
-                children: const [
-                  FilterChipWidget(label: 'Artist'),
-                  FilterChipWidget(label: 'Genre'),
-                  FilterChipWidget(label: 'Location'),
-                  FilterChipWidget(label: 'Price'),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Showing Now
-              gradientTitle("Showing Now"),
-              const SizedBox(height: 12),
-              buildConcertGrid([
-                ConcertCard(title: "EXSIST 2.0\nBernadya", imagePath: "assets/images/exsist.jpg"),
-                ConcertCard(title: "Sisforia:\nTGIF!", imagePath: "assets/images/sisforia.jpg"),
-              ]),
-              const SizedBox(height: 24),
-
-              // Coming Soon
-              gradientTitle("Coming Soon"),
-              const SizedBox(height: 12),
-              buildConcertGrid([
-                ConcertCard(title: "Buzz Youth Fest\nSheila On 7, RAN, dll", imagePath: "assets/images/buzz.jpg"),
-                ConcertCard(title: "Onfest 2024\nTipe-X, Juicy Luicy, dll", imagePath: "assets/images/onfest.jpg"),
-              ]),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -146,67 +219,83 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget buildConcertGrid(List<ConcertCard> cards) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: cards.map((card) => Expanded(child: card)).toList(),
-    );
-  }
 }
 
-class FilterChipWidget extends StatelessWidget {
-  final String label;
+class ConcertSimpleCard extends StatelessWidget {
+  final String concertName;
+  final String concertDate;
+  final String location;
+  final int filled;
+  final int availability;
+  final String concertPoster;
 
-  const FilterChipWidget({super.key, required this.label});
+  const ConcertSimpleCard({
+    super.key,
+    required this.concertName,
+    required this.concertDate,
+    required this.location,
+    required this.filled,
+    required this.availability,
+    required this.concertPoster,
+  });
+
+  String get formattedDate {
+    try {
+      final date = DateTime.parse(concertDate);
+      return DateFormat('d MMMM yyyy', 'id').format(date);
+    } catch (_) {
+      return concertDate;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      label: Text(label),
-      backgroundColor: const Color(0xFF1D1E2D),
-      labelStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-    );
-  }
-}
-
-class ConcertCard extends StatelessWidget {
-  final String title;
-  final String imagePath;
-
-  const ConcertCard({super.key, required this.title, required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // TODO: Navigate to detail
-      },
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFF22E6CE), width: 2),
-          borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.darken),
-          ),
-        ),
-        height: 160,
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              title,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      height: 180,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        image: concertPoster.isNotEmpty
+            ? DecorationImage(
+                image: NetworkImage(concertPoster),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.4),
+                  BlendMode.darken,
+                ),
+              )
+            : null,
+        color: const Color(0xFF1D1E2D),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              concertName,
               style: const TextStyle(
-                color: Color(0xFF22E6CE),
+                color: Color(0xFFC105FF),
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 20,
               ),
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(
+              formattedDate,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              location,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const Spacer(),
+            Text(
+              'Sold: $filled / $availability',
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
         ),
       ),
     );

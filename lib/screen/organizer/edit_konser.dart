@@ -53,16 +53,6 @@ class _EditKonserScreenState extends State<EditKonserScreen> {
         'artist': _artistController.text,
         'description': _deskripsiController.text,
       }).eq('id', widget.concert_table['id']);
-
-      setState(() => isLoading = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Konser berhasil diupdate!')),
-      );
-      Navigator.pop(context, true);
-    }
-  }
-
   Widget label(String text) => Padding(
         padding: const EdgeInsets.only(top: 16, bottom: 4),
         child: Text(

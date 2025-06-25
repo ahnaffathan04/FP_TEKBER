@@ -1,74 +1,134 @@
-import 'package:flutter/material.dart';
 
-// Import AppColors dari file utama
-class AppColors {
-  static const Color background = Color(0xFF151623);
-  static const Color accent = Color(0xFFFF9500);
-  static const Color highlight = Color(0xFF00FF9D);
-  static const Color card = Color(0xFF292B3D);
-  static const Color search = Color(0xFFD9D9D9);
-  static const Color locationText = Color(0xFFC8EFF8);
-  static const Color settingsBorder = Color(0xFF545C8D);
-  static const Color logoutColor = Color(0xFFFF6B6B);
-  static const Color inactiveIcon = Color(0xFF595C8C);
-  static const Color editText = Color(0xFF858A8B);
-}
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+
+import '../constants/app_colors.dart';
+import '../buyer/providers/user_provider.dart';
 
 class AccountScreen extends StatefulWidget {
+  const AccountScreen({super.key});
+
   @override
   _AccountScreenState createState() => _AccountScreenState();
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  // User data - bisa diganti dengan data dari database/API
-  String userName = "John Doe";
-  String userPhone = "081214314164";
-  String userEmail = "john.doe@gmail.com";
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUser();
+  }
+
+  Future<void> _fetchUser() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      await userProvider.fetchUserData().timeout(const Duration(seconds: 10));
+    } catch (e) {
+      debugPrint('Error fetchUserData: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Gagal memuat data akun. Coba lagi.\n$e"),
+            backgroundColor: AppColors.logoutColor,
+          ),
+        );
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _updateField(
+    Future<void> Function() updateFn,
+    String successMsg,
+    String errorMsg,
+  ) async {
+    try {
+      setState(() => _loading = true);
+      await updateFn();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(successMsg), backgroundColor: AppColors.highlight),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error updateField: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$errorMsg\n$e"), backgroundColor: AppColors.logoutColor),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Status Bar
-            _buildStatusBar(),
-            
-            // Header with back button
-            _buildHeader(),
-            
-            // Account Information
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 32),
-                      _buildNameSection(),
-                      SizedBox(height: 32),
-                      _buildPhoneSection(),
-                      SizedBox(height: 32),
-                      _buildEmailSection(),
-                      SizedBox(height: 32),
-                      _buildPasswordSection(),
-                      SizedBox(height: 100), // Space for bottom nav
-                    ],
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  _buildStatusBar(),
+                  _buildHeader(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 32),
+                            _buildNameSection(user.userName, (newVal) {
+                              _updateField(
+                                () => user.updateUserData(user_name: newVal),
+                                "Nama berhasil diupdate",
+                                "Gagal update nama",
+                              );
+                            }),
+                            const SizedBox(height: 32),
+                            _buildPhoneSection(user.userPhone, (newVal) {
+                              _updateField(
+                                () => user.updateUserData(phone_number: newVal),
+                                "Nomor HP berhasil diupdate",
+                                "Gagal update nomor HP",
+                              );
+                            }),
+                            const SizedBox(height: 32),
+                            _buildEmailSection(user.userEmail, (newVal) {
+                              _updateField(
+                                () => user.updateUserData(email: newVal),
+                                "Email berhasil diupdate",
+                                "Gagal update email",
+                              );
+                            }),
+                            const SizedBox(height: 32),
+                            _buildPasswordSection(),
+                            const SizedBox(height: 100),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
-      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 
   Widget _buildStatusBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -88,7 +148,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   Container(
                     width: 4,
                     height: 12,
-                    margin: EdgeInsets.only(right: 2),
+                    margin: const EdgeInsets.only(right: 2),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(2),
@@ -97,7 +157,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   Container(
                     width: 4,
                     height: 12,
-                    margin: EdgeInsets.only(right: 2),
+                    margin: const EdgeInsets.only(right: 2),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(2),
@@ -106,7 +166,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   Container(
                     width: 4,
                     height: 12,
-                    margin: EdgeInsets.only(right: 2),
+                    margin: const EdgeInsets.only(right: 2),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(2),
@@ -115,7 +175,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   Container(
                     width: 4,
                     height: 12,
-                    margin: EdgeInsets.only(right: 8),
+                    margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(2),
@@ -124,8 +184,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 ],
               ),
               // WiFi icon
-              Icon(Icons.wifi, color: Colors.white, size: 18),
-              SizedBox(width: 4),
+              const Icon(Icons.wifi, color: Colors.white, size: 18),
+              const SizedBox(width: 4),
               // Battery
               Container(
                 width: 24,
@@ -155,7 +215,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
           GestureDetector(
@@ -168,8 +228,8 @@ class _AccountScreenState extends State<AccountScreen> {
               size: 24,
             ),
           ),
-          SizedBox(width: 16),
-          Text(
+          const SizedBox(width: 16),
+          const Text(
             "Account",
             style: TextStyle(
               color: Colors.white,
@@ -182,7 +242,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildNameSection() {
+  Widget _buildNameSection(String currentName, Function(String) onSave) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,29 +254,25 @@ class _AccountScreenState extends State<AccountScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              userName,
-              style: TextStyle(
+              currentName,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
               ),
             ),
             GestureDetector(
               onTap: () {
-                _showEditDialog("Name", userName, (newValue) {
-                  setState(() {
-                    userName = newValue;
-                  });
-                });
+                _showEditDialog("Nama", currentName, onSave);
               },
               child: Text(
                 "edit",
                 style: TextStyle(
-                  color: AppColors.editText,
+                  color: AppColors.inactiveIcon,
                   fontSize: 18,
                   fontStyle: FontStyle.italic,
                 ),
@@ -228,7 +284,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildPhoneSection() {
+  Widget _buildPhoneSection(String currentPhone, Function(String) onSave) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -240,29 +296,25 @@ class _AccountScreenState extends State<AccountScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              userPhone,
-              style: TextStyle(
+              currentPhone,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
               ),
             ),
             GestureDetector(
               onTap: () {
-                _showEditDialog("Phone Number", userPhone, (newValue) {
-                  setState(() {
-                    userPhone = newValue;
-                  });
-                });
+                _showEditDialog("Nomor Handphone", currentPhone, onSave);
               },
               child: Text(
                 "edit",
                 style: TextStyle(
-                  color: AppColors.editText,
+                  color: AppColors.inactiveIcon,
                   fontSize: 18,
                   fontStyle: FontStyle.italic,
                 ),
@@ -274,7 +326,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildEmailSection() {
+  Widget _buildEmailSection(String currentEmail, Function(String) onSave) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -286,29 +338,25 @@ class _AccountScreenState extends State<AccountScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              userEmail,
-              style: TextStyle(
+              currentEmail,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
               ),
             ),
             GestureDetector(
               onTap: () {
-                _showEditDialog("Email", userEmail, (newValue) {
-                  setState(() {
-                    userEmail = newValue;
-                  });
-                });
+                _showEditDialog("Email", currentEmail, onSave);
               },
               child: Text(
                 "edit",
                 style: TextStyle(
-                  color: AppColors.editText,
+                  color: AppColors.inactiveIcon,
                   fontSize: 18,
                   fontStyle: FontStyle.italic,
                 ),
@@ -332,11 +380,11 @@ class _AccountScreenState extends State<AccountScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               "•••••",
               style: TextStyle(
                 color: Colors.white,
@@ -351,7 +399,7 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Text(
                 "Change",
                 style: TextStyle(
-                  color: AppColors.editText,
+                  color: AppColors.inactiveIcon,
                   fontSize: 18,
                   fontStyle: FontStyle.italic,
                 ),
@@ -363,81 +411,8 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.card.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/homebuyer',
-                    (route) => false,
-                  );
-                },
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.home,
-                    color: AppColors.inactiveIcon,
-                    size: 24,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  // Handle tickets navigation
-                  print("Tickets tapped");
-                },
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.confirmation_number,
-                    color: AppColors.inactiveIcon,
-                    size: 24,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/homebuyer/setting',
-                    (route) => route.settings.name == '/homebuyer',
-                  );
-                },
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.settings,
-                    color: AppColors.highlight,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showEditDialog(String fieldName, String currentValue, Function(String) onSave) {
     TextEditingController controller = TextEditingController(text: currentValue);
-    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -445,14 +420,14 @@ class _AccountScreenState extends State<AccountScreen> {
           backgroundColor: AppColors.card,
           title: Text(
             "Edit $fieldName",
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           content: TextField(
             controller: controller,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: "Enter new $fieldName",
-              hintStyle: TextStyle(color: Colors.white70),
+              hintText: "Masukkan $fieldName baru",
+              hintStyle: const TextStyle(color: Colors.white70),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.highlight),
               ),
@@ -468,7 +443,7 @@ class _AccountScreenState extends State<AccountScreen> {
               },
               child: Text(
                 "Cancel",
-                style: TextStyle(color: AppColors.editText),
+                style: TextStyle(color: AppColors.inactiveIcon),
               ),
             ),
             TextButton(
@@ -490,110 +465,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void _showPasswordChangeDialog() {
-    TextEditingController currentPasswordController = TextEditingController();
-    TextEditingController newPasswordController = TextEditingController();
-    TextEditingController confirmPasswordController = TextEditingController();
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColors.card,
-          title: Text(
-            "Change Password",
-            style: TextStyle(color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: currentPasswordController,
-                obscureText: true,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "Current Password",
-                  hintStyle: TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: newPasswordController,
-                obscureText: true,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "New Password",
-                  hintStyle: TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "Confirm New Password",
-                  hintStyle: TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.highlight),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: AppColors.editText),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                if (newPasswordController.text == confirmPasswordController.text &&
-                    newPasswordController.text.isNotEmpty) {
-                  // Handle password change logic here
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Password changed successfully"),
-                      backgroundColor: AppColors.highlight,
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Passwords don't match or are empty"),
-                      backgroundColor: AppColors.logoutColor,
-                    ),
-                  );
-                }
-              },
-              child: Text(
-                "Change",
-                style: TextStyle(color: AppColors.highlight),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    context.push('/change-password');
   }
 }

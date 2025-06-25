@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
-
 import '../organizer/manage_konser.dart';
 
 class OrganizerHomeScreen extends StatefulWidget {
   const OrganizerHomeScreen({Key? key}) : super(key: key);
 
   @override
-  State createState() => _OrganizerHomeScreenState();
+  State<OrganizerHomeScreen> createState() => _OrganizerHomeScreenState();
 }
 
 class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
@@ -23,11 +22,11 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
     fetchConcerts();
   }
 
-  Future fetchConcerts() async {
+  Future<void> fetchConcerts() async {
     final response = await Supabase.instance.client
-        .from('concert_table')
+        .from('konser')
         .select()
-        .order('concert_date', ascending: true);
+        .order('tanggal', ascending: true);
     setState(() {
       concerts = List<Map<String, dynamic>>.from(response);
       isLoading = false;
@@ -43,7 +42,7 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   List<Map<String, dynamic>> get _filteredConcerts {
     if (_searchController.text.isEmpty) return concerts;
     return concerts.where((concert) {
-      final title = (concert['concert_name'] ?? '').toLowerCase();
+      final title = (concert['nama_konser'] ?? '').toLowerCase();
       return title.contains(_searchController.text.toLowerCase());
     }).toList();
   }
@@ -91,47 +90,63 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, bottom: 1, top: 32),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            margin: const EdgeInsets.symmetric(vertical: 17),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF22E6CE),
-            ),
-            child: const Icon(Icons.person, color: Colors.white, size: 28),
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Image.asset(
+            'organizer/GradientBG.png',
+            width: 150,
+            height: 150,
+            fit: BoxFit.fill,
           ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Welcome back',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFFC9EFF8),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 1, top: 32),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                margin: const EdgeInsets.symmetric(vertical: 17),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: AssetImage('profile.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              SizedBox(height: 4),
-              Text(
-                'John!',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Welcome back',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFFC9EFF8),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'John!',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -176,11 +191,11 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(right: 16),
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
                 child: Icon(
                   Icons.search,
-                  color: Color(0xFF8F9BB3),
+                  color: const Color(0xFF8F9BB3),
                   size: 20,
                 ),
               ),
@@ -217,16 +232,16 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ManageKonserScreen(concert_table: concert),
+                builder: (context) => ManageKonserScreen(konser: concert),
               ),
             );
           },
           child: _buildConcertCard(
-            title: concert['concert_name'] ?? '',
-            date: concert['concert_date']?.toString() ?? '',
-            venue: concert['location'] ?? '',
+            title: concert['nama_konser'] ?? '',
+            date: concert['tanggal']?.toString() ?? '',
+            venue: concert['lokasi'] ?? '',
             artist: concert['artist'] ?? '',
-            posterUrl: concert['concert_poster'] ?? '',
+            posterUrl: concert['poster_url'] ?? '',
             sold: 'Sold 183/200', // dummy
             rating: 'Rating (5.0)', // dummy
           ),
@@ -239,7 +254,8 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   String formatTanggal(String tanggal) {
     try {
       final date = DateTime.parse(tanggal);
-      return DateFormat('EEEE, dd MMMM yyyy').format(date); // Sunday, 10 November 2024
+      return DateFormat('EEEE, dd MMMM yyyy')
+          .format(date); // Sunday, 10 November 2024
     } catch (_) {
       return tanggal;
     }
@@ -346,9 +362,9 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
                 ),
                 const SizedBox(width: 4),
                 ...List.generate(
-                  5,
-                  (index) => const Icon(Icons.star, color: Color(0xFFFFD700), size: 16),
-                ),
+                    5,
+                    (index) => const Icon(Icons.star,
+                        color: Color(0xFFFFD700), size: 16)),
               ],
             ),
           ],
@@ -365,8 +381,12 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
         color: Color(0xFF545C8D),
         shape: BoxShape.circle,
       ),
-      child: const Center(
-        child: Icon(Icons.camera_alt, color: Colors.white, size: 24),
+      child: Center(
+        child: Image.asset(
+          'organizer/Camera.png',
+          width: 24,
+          height: 24,
+        ),
       ),
     );
   }
@@ -388,31 +408,33 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 28),
-            child: IconButton(
-              icon: const Icon(Icons.home, color: Color(0xFF22E6CE), size: 32),
-              onPressed: () {
-                // Sudah di halaman home
-              },
+            child: Image.asset(
+              'organizer/navbar/Home.png',
+              width: 32,
+              height: 32,
             ),
           ),
           Expanded(
             child: Center(
-              child: IconButton(
-                icon: const Icon(Icons.add_circle, color: Color(0xFF22E6CE), size: 32),
-                onPressed: () {
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
                   context.push('/tambah-konser');
                 },
+                child: Image.asset(
+                  'organizer/navbar/Plus.png',
+                  width: 32,
+                  height: 32,
+                ),
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(right: 28),
-            child: IconButton(
-              icon: const Icon(Icons.settings, color: Color(0xFF22E6CE), size: 32),
-              onPressed: () {
-                // Navigasi ke halaman settings organizer
-                context.push('/organizer-home/setting');
-              },
+            child: Image.asset(
+              'organizer/navbar/Settings.png',
+              width: 32,
+              height: 32,
             ),
           ),
         ],
