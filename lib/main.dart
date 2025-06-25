@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Import screen QRScannerWeb
+import 'qr_scanner_web.dart'; 
+
 // Auth Screens
 import 'screen/auth/login_screen.dart';
 import 'screen/auth/register_screen.dart';
@@ -17,42 +20,23 @@ import 'screen/buyer/my_ticket.dart';
 import 'screen/buyer/concert_detail.dart';
 import 'screen/buyer/concert_detail_completed.dart';
 
-// Organizer Screens
 import 'screen/organizer/home_screen.dart';
-import 'screen/organizer/manage_tiket.dart';
-import 'screen/organizer/tambah_tiket.dart';
-import 'screen/organizer/manage_konser.dart';
-import 'screen/organizer/edit_konser.dart';
 
-// Complaint Screens
 import 'screen/complaint/submit_complaint.dart';
-
-// Providers
-import 'screen/buyer/providers/user_provider.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
-  );
-
-  await initializeDateFormatting('id', null);
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+void main() {
+  runApp(MyApp());
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/register',
+  // LANGKAH 2: Ubah initialLocation untuk menunjuk ke rute baru Anda.
+  initialLocation: '/qr-scanner', 
   routes: [
+    // LANGKAH 1: Tambahkan rute baru untuk QRScannerWeb
+    GoRoute(
+      path: '/qr-scanner',
+      builder: (context, state) => const QRScannerWeb(),
+    ),
+
     // Choose Role Route
     GoRoute(
       path: '/choose-role',
@@ -145,6 +129,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF111317),
       ),
       debugShowCheckedModeBanner: false,
+      
     );
   }
 }
