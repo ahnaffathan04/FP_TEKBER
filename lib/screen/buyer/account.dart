@@ -1,9 +1,10 @@
-import '../constants/app_colors.dart';
-import '../buyer/providers/user_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+
+import '../constants/app_colors.dart';
+import '../buyer/providers/user_provider.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});

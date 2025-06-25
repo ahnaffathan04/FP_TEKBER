@@ -76,40 +76,40 @@ class _PageSettingState extends State<PageSetting> {
           Row(
             children: [
               Row(
-              children: [
-                SizedBox(width: 2.0),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                children: [
+                  SizedBox(width: 2.0),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                    ),
+                    child: SizedBox(width: 4.0, height: 12.0),
                   ),
-                  child: SizedBox(width: 4.0, height: 12.0),
-                ),
-                SizedBox(width: 2.0),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  SizedBox(width: 2.0),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                    ),
+                    child: SizedBox(width: 4.0, height: 12.0),
                   ),
-                  child: SizedBox(width: 4.0, height: 12.0),
-                ),
-                SizedBox(width: 2.0),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  SizedBox(width: 2.0),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                    ),
+                    child: SizedBox(width: 4.0, height: 12.0),
                   ),
-                  child: SizedBox(width: 4.0, height: 12.0),
-                ),
-                SizedBox(width: 2.0),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                  SizedBox(width: 2.0),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(1.0)),
+                    ),
+                    child: SizedBox(width: 4.0, height: 12.0),
                   ),
-                  child: SizedBox(width: 4.0, height: 12.0),
-                ),
-              ],
+                ],
               ),
               SizedBox(width: 4),
               Icon(Icons.wifi, color: Colors.white, size: 16),
@@ -182,20 +182,91 @@ class _PageSettingState extends State<PageSetting> {
   }
 
   Widget _buildSettingsMenu() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          _buildSettingsItem(title: "Account", onTap: () => context.push('/buyer-home/setting/account')),
-          Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
-          _buildSettingsItem(title: "Language", onTap: () => context.push("/buyer-home/setting/language")),
-          Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
-          _buildSettingsItem(title: "Logout", onTap: () => context.push("/login")),
-        ],
-      ),
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              _buildSettingsItem(
+                title: "Account",
+                onTap: () => context.push('/buyer-home/setting/account'),
+                showChevron: true,
+              ),
+              Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
+              _buildSettingsItem(
+                title: "Language",
+                onTap: () => context.push("/buyer-home/setting/language"),
+                showChevron: true,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+        // Attractive logout button in its own container
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.logoutColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            leading: Icon(Icons.logout, color: AppColors.logoutColor),
+            title: Text(
+              "Logout",
+              style: TextStyle(
+                color: AppColors.logoutColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            onTap: _showLogoutDialog,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.card,
+          title: const Text("Logout", style: TextStyle(color: Colors.white)),
+          content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.white70)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel", style: TextStyle(color: AppColors.highlight)),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await Supabase.instance.client.auth.signOut();
+                  if (mounted) {
+                    Navigator.of(context).pop(); // Close the dialog first
+                    context.go('/login');        // Then navigate
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Logout gagal: $e"),
+                        backgroundColor: AppColors.logoutColor,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text("Logout", style: TextStyle(color: AppColors.logoutColor)),
+            ),
+          ],
+        );
+      },
     );
   }
 
