@@ -32,24 +32,18 @@ import 'screen/organizer/language_organizer.dart';
 import 'screen/complaint/submit_complaint.dart';
 
 // Providers
-import 'screen/buyer/providers/user_provider.dart';
+//import 'screen/buyer/providers/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Must be first
 
   await Supabase.initialize(
-    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',  // 🔁 Replace with your Supabase URL
+    url: 'https://supabase.com/dashboard/project/ncasjwbrdpjjvoouemwj',  // 🔁 Replace with your Supabase URL
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
   );
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
+    MyApp());
 }
 
 final GoRouter _router = GoRouter(
@@ -63,7 +57,7 @@ final GoRouter _router = GoRouter(
 
     // Auth Routes
     GoRoute(
-      path: '/login',
+      path: '/auth/login',
       builder: (context, state) => LoginScreen(),
     ),
     GoRoute(

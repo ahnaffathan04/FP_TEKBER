@@ -32,6 +32,10 @@ dependencies:
   lucide_icons: ^0.257.0
   lib: ^0.0.3
   flutter_rating_bar: ^4.0.0
+  intl: ^0.18.1
+  go_router: ^14.0.0 # Atau versi terbaru yang direkomendasikan
+  provider: ^6.1.2   # Atau versi terbaru yang direkomendasikan
+  supabase_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:
