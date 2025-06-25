@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../constants/app_colors.dart';
 
@@ -192,7 +193,7 @@ class _PageSettingState extends State<PageSetting> {
           Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
           _buildSettingsItem(title: "Language", onTap: () => context.push("/buyer-home/setting/language")),
           Divider(color: AppColors.settingsBorder, height: 1, indent: 24, endIndent: 24),
-          _buildSettingsItem(title: "Logout", onTap: _showLogoutDialog, isLogout: true),
+          _buildSettingsItem(title: "Logout", onTap: () => context.push("/login")),
         ],
       ),
     );
@@ -228,32 +229,6 @@ class _PageSettingState extends State<PageSetting> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.card,
-          title: const Text("Logout", style: TextStyle(color: Colors.white)),
-          content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.white70)),
-          actions: [
-            TextButton(
-              onPressed: Navigator.of(context).pop,
-              child: Text("Cancel", style: TextStyle(color: AppColors.highlight)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                debugPrint("User logged out");
-              },
-              child: Text("Logout", style: TextStyle(color: AppColors.logoutColor)),
-            ),
-          ],
-        );
-      },
     );
   }
 }
