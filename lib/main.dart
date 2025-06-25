@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Auth Screens
@@ -30,12 +31,14 @@ import 'screen/complaint/submit_complaint.dart';
 import 'screen/buyer/providers/user_provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Must be first
+  WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
-    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',  // 🔁 Replace with your Supabase URL
+    url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
   );
+
+  await initializeDateFormatting('id', null);
 
   runApp(
     MultiProvider(
