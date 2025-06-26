@@ -115,6 +115,7 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
     });
   }
 
+  
   String _formatTime(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
@@ -255,6 +256,39 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
     );
   }
 
+    Future<void> _saveOrderToSupabase() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not logged in.')),
+      );
+      return;
+    }
+
+    final orderData = {
+      'user_id': user.id,
+      'concert_id': widget.concertId,
+      'category': widget.category,
+      'payment_method': _selectedPaymentMethod,
+      'total_price': _calculateTotal(),
+      'quantity': _ticketQuantities,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    try {
+      await supabase.from('ticket_table').insert(orderData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order saved successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save order: $e')),
+      );
+    }
+  }
+
   Widget _buildAdjustableOrderItem(
       String category, double price, int quantity, {required VoidCallback onDecrement, required VoidCallback onIncrement}) {
     return Padding(
@@ -379,13 +413,12 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
                     : Colors.grey,
               ),
               onPressed: (_calculateTotal() > 0 && _selectedPaymentMethod != 'Change Payment Method')
-                  ? () {
+                  ? () async {
+                      await _saveOrderToSupabase(); // ✅ simpan ke Supabase
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Payment via $_selectedPaymentMethod successful!')),
                       );
-
-                      // Kembali ke Home
-                      context.go('/buyer-home'); // Jika kamu pakai go_router
+                      context.go('/buyer-home');
                     }
                   : null,
               child: const Text(
