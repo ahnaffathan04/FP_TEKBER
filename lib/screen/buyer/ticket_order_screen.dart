@@ -1,11 +1,32 @@
 // lib/screens/ticket_order_screen.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TicketOrderScreen extends StatefulWidget {
+  final String category;
+  final double price;
+  final Color color;
   final Map<String, int> initialTicketQuantities;
+  final int concertId;
+  final String concertName;
+  final String concertDate;
+  final String location;
+  final String poster;
 
-  const TicketOrderScreen({super.key, required this.initialTicketQuantities});
+  const TicketOrderScreen({
+    super.key, 
+    required this.category,
+    required this.price,
+    required this.color,
+    required this.initialTicketQuantities,
+    required this.concertId,
+    required this.concertName,
+    required this.concertDate,
+    required this.location,
+    required this.poster,
+    });
 
   @override
   State<TicketOrderScreen> createState() => _TicketOrderScreenState();
@@ -168,7 +189,7 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('SISFORIA: TGIF!', style: Theme.of(context).textTheme.bodyLarge),
+                Text(widget.concertName, style: Theme.of(context).textTheme.bodyLarge),
                 const SizedBox(height: 4),
                 Row(
                   children: const [
@@ -180,8 +201,8 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text('Sunday 28 November 2021', style: Theme.of(context).textTheme.bodySmall),
-                Text('Balai Sarbini, South Jakarta', style: Theme.of(context).textTheme.bodySmall),
+                Text(widget.concertDate, style: Theme.of(context).textTheme.bodySmall),
+                Text(widget.location, style: Theme.of(context).textTheme.bodySmall),
                 Text('09:00 PM', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
@@ -282,8 +303,8 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
           const SizedBox(height: 10),
           GestureDetector(
             onTap: () async {
-              final result = await Navigator.pushNamed(context, '/payment_method');
-              if (result != null && result is String) {
+              final result = await context.push<String>('/payment_method');
+              if (result != null) {
                 setState(() {
                   _selectedPaymentMethod = result;
                 });
@@ -352,18 +373,25 @@ class _TicketOrderScreenState extends State<TicketOrderScreen> {
           SizedBox(
             height: 50,
             child: ElevatedButton(
-              onPressed: () {
-                if (_calculateTotal() <= 0) {
-                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please select at least one ticket to proceed.')),
-                  );
-                  return;
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Proceeding to payment... (Not implemented)')),
-                );
-              },
-              child: const Text('PAID-PAYMENT', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: (_calculateTotal() > 0 && _selectedPaymentMethod != 'Change Payment Method')
+                    ? Colors.blue
+                    : Colors.grey,
+              ),
+              onPressed: (_calculateTotal() > 0 && _selectedPaymentMethod != 'Change Payment Method')
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Payment via $_selectedPaymentMethod successful!')),
+                      );
+
+                      // Kembali ke Home
+                      context.go('/buyer-home'); // Jika kamu pakai go_router
+                    }
+                  : null,
+              child: const Text(
+                'PAID-PAYMENT',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],

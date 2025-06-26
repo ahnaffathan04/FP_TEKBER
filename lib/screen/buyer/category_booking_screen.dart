@@ -1,16 +1,30 @@
 // lib/screens/category_booking_screen.dart (perubahan)
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CategoryBookingScreen extends StatefulWidget {
   final String category;
   final double price;
   final Color color;
+  final Map<String, int> initialTicketQuantities;
+  final int concertId;
+  final String concertName;
+  final String concertDate;
+  final String location;
+  final String poster;
+
 
   const CategoryBookingScreen({
     super.key,
     required this.category,
     required this.price,
     required this.color,
+    required this.initialTicketQuantities,
+    required this.concertId,
+    required this.concertName,
+    required this.concertDate,
+    required this.location,
+    required this.poster,
   });
 
   @override
@@ -221,13 +235,19 @@ class _CategoryBookingScreenState extends State<CategoryBookingScreen> {
             child: ElevatedButton(
               onPressed: () {
                 if (_numberOfTickets > 0) {
-                  Navigator.pushNamed(
-                    context,
-                    '/ticket_order',
-                    arguments: {
+                  context.push('/ticket_order', extra: {
+                    'initialTicketQuantities': {
                       widget.category: _numberOfTickets,
                     },
-                  );
+                    'category': widget.category,
+                    'price': widget.price,
+                    'color': widget.color,
+                    'concertId': widget.concertId,
+                    'concertName': widget.concertName,
+                    'concertDate': widget.concertDate,
+                    'location': widget.location,
+                    'poster': widget.poster,
+                  });
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please select at least one ticket!')),
@@ -236,7 +256,7 @@ class _CategoryBookingScreenState extends State<CategoryBookingScreen> {
               },
               child: const Text(
                 'BUY TICKET',
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
               ),
             ),
           ),

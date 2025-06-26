@@ -1,8 +1,22 @@
 // lib/screens/book_ticket_overview_screen.dart (perubahan)
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class BookTicketOverviewScreen extends StatelessWidget {
-  const BookTicketOverviewScreen({super.key});
+  final int concertId;
+  final String concertName;
+  final String concertDate;
+  final String location;
+  final String poster;
+
+  const BookTicketOverviewScreen({
+    super.key,
+    required this.concertId,
+    required this.concertName,
+    required this.concertDate,
+    required this.location,
+    required this.poster,
+    });
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +26,7 @@ class BookTicketOverviewScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
-            // Navigator.pop(context); // If there's a previous screen
+            context.go('/buyer-home');
           },
         ),
       ),
@@ -39,18 +53,21 @@ class BookTicketOverviewScreen extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Information is not available yet!')),
-                  );
+                  context.push('/concert/detail', extra: {
+                    'concertId': concertId,
+                    'concertName': concertName,
+                    'concertDate': concertDate,
+                    'location': location,
+                    'poster': poster,
+                  });
                 },
-                // Tambahkan styleFrom untuk mengatur warna
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E323D), // Warna latar belakang seperti di gambar (dark blue-gray)
-                  foregroundColor: const Color(0xFF00D4FF), // Warna teks cyan
+                  backgroundColor: const Color(0xFF2E323D),
+                  foregroundColor: const Color(0xFF00D4FF),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // Sesuaikan radius jika perlu
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16), // Sesuaikan padding jika perlu
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text('About Concert', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -74,7 +91,7 @@ class BookTicketOverviewScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('SISFORIA: TGIF!', style: Theme.of(context).textTheme.bodyLarge),
+              Text(concertName, style: Theme.of(context).textTheme.bodyLarge),
               const Icon(Icons.info_outline, color: Colors.white70),
             ],
           ),
@@ -85,7 +102,7 @@ class BookTicketOverviewScreen extends StatelessWidget {
             children: [
               const Icon(Icons.calendar_today, size: 16, color: Colors.white70),
               const SizedBox(width: 8),
-              Text('28 November 2021', style: Theme.of(context).textTheme.bodyMedium),
+              Text(concertDate, style: Theme.of(context).textTheme.bodyMedium),
               const Spacer(),
               const Icon(Icons.access_time, size: 16, color: Colors.white70),
               const SizedBox(width: 8),
@@ -125,12 +142,23 @@ class BookTicketOverviewScreen extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           if (isSoldOut) {
-            Navigator.pushNamed(context, '/sold_out');
+            context.push('/sold_out');
           } else {
-            Navigator.pushNamed(context, '/category_booking', arguments: {
+            context.push('/category_booking', extra: {
               'category': category,
               'price': _getPriceFromString(price),
               'color': color,
+              'concertId': concertId,
+              'concertName': concertName,
+              'concertDate': concertDate,
+              'location': location,
+              'poster': poster,
+              'initialTicketQuantities': {
+                'VVIP': 0,
+                'CAT 1': 0,
+                'CAT 2': 0,
+                'CAT 3': 0,
+              },
             });
           }
         },

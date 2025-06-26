@@ -1,108 +1,135 @@
-import 'package:ezrameeting2tekber/screen/complaint/submit_complaint_page.dart';
+// Importing necessary packages
 import 'package:flutter/material.dart';
-import 'package:ezrameeting2tekber/screen/auth/login_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class SignupScreen extends StatefulWidget {
+// Importing necessary screens
+import '../constants/app_colors.dart';
+
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController numberController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController userNameController = TextEditingController();
-  TextEditingController userCategoryController = TextEditingController();
-  TextEditingController userAddressController = TextEditingController();
-  TextEditingController profilePictureController = TextEditingController();
-  TextEditingController dateOfBirthController = TextEditingController();
-
-  bool isLoading = false;
-
+class _RegisterScreenState extends State<RegisterScreen> {
   final supabase = Supabase.instance.client;
 
-  // Fungsi signup
-  Future<void> _signup() async {
-    final name = nameController.text.trim();
-    final email = emailController.text.trim();
-    final number = numberController.text.trim();
-    final password = passwordController.text.trim();
-    final userName = userNameController.text.trim();
-    final userCategory = userCategoryController.text.trim();
-    final userAddress = userAddressController.text.trim();
-    final profilePicture = profilePictureController.text.trim();
-    final dateOfBirth = dateOfBirthController.text.trim();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
-    if (name.isEmpty ||
-        number.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        userName.isEmpty ||
-        userCategory.isEmpty ||
-        userAddress.isEmpty ||
-        profilePicture.isEmpty ||
-        dateOfBirth.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-          "Harap isi semua detail",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.red,
-      ));
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _userCategoryController = TextEditingController();
+  final TextEditingController _userAddressController = TextEditingController();
+  final TextEditingController _profilePictureController = TextEditingController();
+  final TextEditingController _dateOfBirthController = TextEditingController();
+
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    _userNameController.dispose();
+    _userCategoryController.dispose();
+    _userAddressController.dispose();
+    _profilePictureController.dispose();
+    _dateOfBirthController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _Register() async {
+    final email = _emailController.text.trim();
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+    final userName = _userNameController.text.trim();
+    final userCategory = _userCategoryController.text.trim().toLowerCase();
+    final userAddress = _userAddressController.text.trim();
+    final profilePicture = _profilePictureController.text.trim();
+    final dateOfBirth = _dateOfBirthController.text.trim();
+
+    if ([email, name, phone, password, confirmPassword, userName, userCategory, userAddress, profilePicture, dateOfBirth].any((e) => e.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Harap isi semua detail"), backgroundColor: Colors.red),
+      );
       return;
     }
 
-    // Validasi tipe data
+    if (userCategory != 'buyer' && userCategory != 'organizer') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Kategori pengguna hanya boleh 'buyer' atau 'organizer'"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password tidak cocok"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     final phoneRegex = RegExp(r'^\d+$');
-    final dateRegex = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+    final parsedDate = DateTime.tryParse(dateOfBirth);
     final urlRegex = RegExp(r'^(http|https)://');
 
     if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Format email tidak valid"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (!phoneRegex.hasMatch(phone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Nomor telepon hanya boleh angka"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (parsedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Format email tidak valid"),
+        content: Text("Tanggal lahir tidak valid atau salah format (YYYY-MM-DD)"),
         backgroundColor: Colors.red,
       ));
       return;
     }
-    if (!phoneRegex.hasMatch(number)) {
+    if (parsedDate.isAfter(DateTime.now())) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Nomor telepon hanya boleh angka"),
+        content: Text("Tanggal lahir tidak boleh di masa depan"),
         backgroundColor: Colors.red,
       ));
       return;
     }
-    if (!dateRegex.hasMatch(dateOfBirth)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Tanggal lahir harus format YYYY-MM-DD"),
-        backgroundColor: Colors.red,
-      ));
-      return;
-    }
+
     if (!urlRegex.hasMatch(profilePicture)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Link foto profil harus berupa URL valid (http/https)"),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Link foto profil harus berupa URL valid (http/https)"), backgroundColor: Colors.red),
+      );
       return;
     }
-    setState(() {
-      isLoading = true;
-    });
+
+    setState(() => isLoading = true);
 
     try {
       final userCreate = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'full_name': name,
-          'phone_number': number,
-        },
+        data: {'full_name': name, 'phone_number': phone},
       );
-
-      // print("Respon signup: ${userCreate.toString()}");
 
       if (userCreate.user != null) {
         final profileData = {
@@ -111,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'user_name': userName,
           'user_category': userCategory,
           'email': email,
-          'phone_number': number,
+          'phone_number': phone,
           'user_address': userAddress,
           'profile_picture': profilePicture,
           'date_of_birth': dateOfBirth,
@@ -121,197 +148,127 @@ class _SignupScreenState extends State<SignupScreen> {
           'created_at': DateTime.now().toIso8601String(),
         };
 
-        // print("Data profil: $profileData");
+        final response = await supabase.from('profiles').upsert(profileData).select();
 
-        final response =
-            await supabase.from('profiles').upsert(profileData).select();
-        // print("Respon insert profil: ${response.toString()}");
-
-        // response is a List, check if data is returned
         if (response.isNotEmpty) {
-          // print("Insert profil berhasil: $response");
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text(
-              "Pendaftaran berhasil!",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.green,
-          ));
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Pendaftaran berhasil!"), backgroundColor: Colors.green),
           );
+          context.go('/login');
         } else {
-          // Tidak ada data yang dikembalikan
-          // print("Tidak ada data yang dikembalikan setelah insert profil.");
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Data profil tidak berhasil disimpan."),
-            backgroundColor: Colors.orange,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Data profil tidak berhasil disimpan."), backgroundColor: Colors.orange),
+          );
         }
       }
     } catch (e) {
-      // print("Error saat signup: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Gagal: $e"),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal: $e"), backgroundColor: Colors.red),
+      );
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
+  }
+
+
+  Widget _buildInputField(String label, TextEditingController controller, {bool obscure = false, Widget? suffixIcon}) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        filled: true,
+        fillColor: Colors.transparent,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(color: AppColors.bluishCyan),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(color: AppColors.lovelyPurple, width: 2.0),
+        ),
+        suffixIcon: suffixIcon,
+      ),
+      style: const TextStyle(color: Colors.white),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  "lib/assets/icons/account.png",
-                  height: 200,
-                ),
-                const Text("Welcome",
-                    style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue)),
-                const SizedBox(height: 20),
-
-                // Name
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                      labelText: "Full Name", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // Email
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                      labelText: "Email", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // Phone Number
-                TextField(
-                  controller: numberController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                      labelText: "Phone Number", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // Password
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      labelText: "Password", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 20),
-
-                // User Name
-                TextField(
-                  controller: userNameController,
-                  decoration: const InputDecoration(
-                      labelText: "User Name", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // User Category
-                TextField(
-                  controller: userCategoryController,
-                  decoration: const InputDecoration(
-                      labelText: "User Category", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // User Address
-                TextField(
-                  controller: userAddressController,
-                  decoration: const InputDecoration(
-                      labelText: "Alamat", border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // Profile Picture (link)
-                TextField(
-                  controller: profilePictureController,
-                  decoration: const InputDecoration(
-                      labelText: "Link Foto Profil",
-                      border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                // Date of Birth
-                TextField(
-                  controller: dateOfBirthController,
-                  decoration: const InputDecoration(
-                      labelText: "Tanggal Lahir (YYYY-MM-DD)",
-                      border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-
-                ElevatedButton(
-                  onPressed: () {
-                    _signup();
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade200,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6)),
-                      side: const BorderSide(width: 2, color: Colors.blue)),
-                  child: isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : const Text(
-                          "Sign Up ",
-                          style: TextStyle(
-                              fontSize: 23, fontWeight: FontWeight.bold),
-                        ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    );
-                  },
-                  child: const Text(
-                    "Already have an account? Login",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            // Import the page at the top of your file:
-                            // import 'package:ezrameeting2tekber/screen/complaint/submit_complaint_page.dart';
-                            SubmitComplaintPage(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    "Laporkan masalah di sini",
-                    style: TextStyle(fontSize: 16, color: Colors.red),
-                  ),
-                ),
-              ],
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [AppColors.lovelyPurple, AppColors.shockingPink],
+              ).createShader(bounds),
+              child: const Text(
+                'FestiPass',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
             ),
-          ),
+            const SizedBox(height: 40),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Register', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.bluishCyan)),
+            ),
+            const SizedBox(height: 24),
+            _buildInputField('Email', _emailController),
+            const SizedBox(height: 12),
+            _buildInputField('Full Name', _nameController),
+            const SizedBox(height: 12),
+            _buildInputField('Phone Number', _phoneController),
+            const SizedBox(height: 12),
+            _buildInputField('New Password', _newPasswordController, obscure: _obscureNewPassword,
+              suffixIcon: IconButton(
+                icon: Icon(_obscureNewPassword ? Icons.visibility : Icons.visibility_off, color: Colors.grey),
+                onPressed: () => setState(() => _obscureNewPassword = !_obscureNewPassword),
+              )
+            ),
+            const SizedBox(height: 12),
+            _buildInputField('Confirm Password', _confirmPasswordController, obscure: _obscureConfirmPassword,
+              suffixIcon: IconButton(
+                icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off, color: Colors.grey),
+                onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+              )
+            ),
+            const SizedBox(height: 12),
+            _buildInputField('User Name', _userNameController),
+            const SizedBox(height: 12),
+            _buildInputField('User Category', _userCategoryController),
+            const SizedBox(height: 12),
+            _buildInputField('Address', _userAddressController),
+            const SizedBox(height: 12),
+            _buildInputField('Profile Picture URL', _profilePictureController),
+            const SizedBox(height: 12),
+            _buildInputField('Date of Birth (YYYY-MM-DD)', _dateOfBirthController),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _Register,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Register', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+            TextButton(
+              onPressed: () => context.go('/login'),
+              child: const Text('Already have an account? Login', style: TextStyle(fontSize: 16, color: Colors.white)),
+            ),
+            TextButton(
+              onPressed: () => context.go('/complaint'),
+              child: const Text('Laporkan masalah di sini', style: TextStyle(fontSize: 16, color: Colors.red)),
+            )
+          ],
         ),
       ),
     );
