@@ -21,6 +21,7 @@ import 'screen/buyer/concert_detail.dart';
 import 'screen/buyer/concert_detail_completed.dart';
 
 import 'screen/organizer/home_screen.dart';
+import 'screen/organizer/overview_konser.dart';
 
 import 'screen/complaint/submit_complaint.dart';
 void main() {
@@ -29,8 +30,13 @@ void main() {
 
 final GoRouter _router = GoRouter(
   // LANGKAH 2: Ubah initialLocation untuk menunjuk ke rute baru Anda.
-  initialLocation: '/qr-scanner', 
+  initialLocation: '/ticket-overview', 
   routes: [
+    GoRoute(
+      path: '/ticket-overview',
+      builder: (context, state) => const TicketOverviewScreen(),
+    ),
+
     // LANGKAH 1: Tambahkan rute baru untuk QRScannerWeb
     GoRoute(
       path: '/qr-scanner',
