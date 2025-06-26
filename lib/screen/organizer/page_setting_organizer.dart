@@ -140,7 +140,7 @@ class _OrganizerPageSettingState extends State<OrganizerPageSetting> {
             child: Center(
               child: IconButton(
                 icon: const Icon(Icons.add_circle, color: Color(0xFF22E6CE), size: 32),
-                onPressed: () => context.push('/tambah-konser'),
+                onPressed: () => context.push('/organizer-home/tambah-konser'),
               ),
             ),
           ),

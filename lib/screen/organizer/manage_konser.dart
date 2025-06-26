@@ -15,6 +15,7 @@ class ManageKonserScreen extends StatefulWidget {
 
 class _ManageKonserScreenState extends State<ManageKonserScreen> {
   bool isLoading = false;
+  List<Map<String, dynamic>> tickets = [];
 
   @override
   void initState() {
@@ -22,8 +23,28 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
     Future.microtask(() {
       Provider.of<ConcertProvider>(context, listen: false)
           .setConcert(widget.concert_table);
+      fetchTickets();
     });
   }
+
+Future<void> fetchTickets() async {
+  try {
+    final concert = Provider.of<ConcertProvider>(context, listen: false).concert;
+    final concertId = concert['concert_id'];
+
+    final response = await Supabase.instance.client
+        .from('concert_ticket')
+        .select('category, availability') // hanya ambil data yg dibutuhkan
+        .eq('concert_id', concertId);
+
+    setState(() {
+      tickets = List<Map<String, dynamic>>.from(response);
+    });
+  } catch (e) {
+    print('Error fetching tickets: $e');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -246,6 +267,35 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
                 fontSize: 14,
               ),
             ),
+            const SizedBox(height: 12),
+            // Ticket Availability Section
+            const Text(
+              'Tiket Tersedia',
+              style: TextStyle(
+                color: Color(0xFFC8EFF8),
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+            tickets.isEmpty
+              ? const Text('Tidak ada tiket tersedia.')
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: tickets.map((ticket) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text(
+                      '${ticket['category'] ?? 'Tiket'}: ${ticket['availability']} tersedia',
+                      style: const TextStyle(
+                        color: Colors.white,
+                    fontSize: 15,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
             const SizedBox(height: 24),
             // Tombol Aksi
             Row(
@@ -333,14 +383,15 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                TambahTiketScreen(),
+                            builder: (context) => TambahTiketScreen(),
                           ),
                         );
+                        // Refresh tickets after returning from TambahTiketScreen
+                        fetchTickets();
                       },
                       child: const Text(
                         'Tambah Tiket',

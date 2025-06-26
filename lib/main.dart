@@ -27,6 +27,7 @@ import 'screen/buyer/concert_detail_completed.dart';
 // Organizer Screens
 import 'screen/organizer/home_screen.dart';
 import 'screen/organizer/tambah_tiket.dart';
+import 'screen/organizer/tambah_konser.dart';
 import 'screen/organizer/manage_konser.dart';
 import 'screen/organizer/edit_konser.dart';
 import 'screen/organizer/page_setting_organizer.dart';
@@ -63,7 +64,7 @@ void main() async {
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/register',
+  initialLocation: '/buyer-home',
   routes: [
     // Choose Role Route
     GoRoute(
@@ -145,6 +146,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/organizer-home/setting/account_organizer',
       builder: (context, state) => OrganizerAccountScreen(),
+    ),
+    GoRoute(
+      path: '/organizer-home/tambah-konser',
+      builder: (context, state) => TambahKonserScreen(),
     ),
         GoRoute(
       path: '/organizer-home/setting/language_organizer',

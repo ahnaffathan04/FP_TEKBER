@@ -405,7 +405,7 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
               child: IconButton(
                 icon: const Icon(Icons.add_circle, color: Color(0xFF22E6CE), size: 32),
                 onPressed: () {
-                  context.push('/tambah-konser');
+                  context.push('/organizer-home/tambah-konser');
                 },
               ),
             ),
