@@ -56,10 +56,10 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFF00FFB3), width: 2),
-                image: widget.konser['poster_url'] != null &&
-                        widget.konser['poster_url'] != ''
+                image: widget.konser['concert_poster'] != null &&
+                        widget.konser['concert_poster'] != ''
                     ? DecorationImage(
-                        image: NetworkImage(widget.konser['poster_url']),
+                        image: NetworkImage(widget.konser['concert_poster']),
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
                           Colors.black.withOpacity(0.4),
@@ -144,7 +144,7 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
               ),
             ),
             Text(
-              widget.konser['nama_konser'] ?? '',
+              widget.konser['concert_name'] ?? '',
               style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'Poppins',
@@ -164,7 +164,7 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
               ),
             ),
             Text(
-              formatTanggal(widget.konser['tanggal'] ?? ''),
+              formatTanggal(widget.konser['concert_date'] ?? ''),
               style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'Poppins',
@@ -184,7 +184,7 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
               ),
             ),
             Text(
-              widget.konser['lokasi'] ?? '',
+              widget.konser['location'] ?? '',
               style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'Poppins',
@@ -227,7 +227,7 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
               ),
             ),
             Text(
-              widget.konser['deskripsi'] ?? '',
+              widget.konser['description'] ?? '',
               style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'Poppins',
@@ -269,9 +269,12 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
                             if (confirm == true) {
                               setState(() => isLoading = true);
                               await Supabase.instance.client
-                                  .from('konser')
+                                  .from('concert_table') // Ganti nama tabel
                                   .delete()
-                                  .eq('id', widget.konser['id']);
+                                  .eq(
+                                      'concert_id',
+                                      widget.konser[
+                                          'concert_id']); // Ganti kolom id
                               setState(() => isLoading = false);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

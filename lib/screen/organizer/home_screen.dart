@@ -24,9 +24,9 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
 
   Future<void> fetchConcerts() async {
     final response = await Supabase.instance.client
-        .from('konser')
+        .from('concert_table')
         .select()
-        .order('tanggal', ascending: true);
+        .order('concert_date', ascending: true);
     setState(() {
       concerts = List<Map<String, dynamic>>.from(response);
       isLoading = false;
@@ -42,7 +42,8 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
   List<Map<String, dynamic>> get _filteredConcerts {
     if (_searchController.text.isEmpty) return concerts;
     return concerts.where((concert) {
-      final title = (concert['nama_konser'] ?? '').toLowerCase();
+      final title =
+          (concert['concert_name'] ?? '').toLowerCase(); // Ganti nama kolom
       return title.contains(_searchController.text.toLowerCase());
     }).toList();
   }
@@ -237,11 +238,11 @@ class _OrganizerHomeScreenState extends State<OrganizerHomeScreen> {
             );
           },
           child: _buildConcertCard(
-            title: concert['nama_konser'] ?? '',
-            date: concert['tanggal']?.toString() ?? '',
-            venue: concert['lokasi'] ?? '',
+            title: concert['concert_name'] ?? '',
+            date: concert['concert_date']?.toString() ?? '',
+            venue: concert['location'] ?? '',
             artist: concert['artist'] ?? '',
-            posterUrl: concert['poster_url'] ?? '',
+            posterUrl: concert['concert_poster'] ?? '',
             sold: 'Sold 183/200', // dummy
             rating: 'Rating (5.0)', // dummy
           ),

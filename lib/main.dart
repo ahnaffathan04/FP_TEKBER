@@ -1,4 +1,4 @@
-import 'package:ezrameeting2tekber/screen/organizer/manage_tiket.dart';
+import 'package:ezrameeting2tekber/screen/organizer/tambah_tiket.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'screen/organizer/home_screen.dart';

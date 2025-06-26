@@ -499,13 +499,13 @@ class _TambahKonserScreenState extends State<TambahKonserScreen> {
         posterUrl = await uploadPoster(_posterImage!);
       }
 
-      await Supabase.instance.client.from('konser').insert({
-        'nama_konser': _namaKonserController.text,
-        'tanggal': _tanggalController.text,
-        'lokasi': _lokasiController.text,
+      await Supabase.instance.client.from('concert_table').insert({
+        'concert_name': _namaKonserController.text,
+        'concert_date': _tanggalController.text,
+        'location': _lokasiController.text,
         'artist': _artistController.text,
-        'deskripsi': _deskripsiController.text,
-        'poster_url': posterUrl ?? '',
+        'description': _deskripsiController.text,
+        'concert_poster': posterUrl ?? '',
       });
 
       setState(() => isLoading = false);
