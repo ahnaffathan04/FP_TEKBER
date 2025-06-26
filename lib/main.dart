@@ -30,7 +30,7 @@ void main() {
 
 final GoRouter _router = GoRouter(
   // LANGKAH 2: Ubah initialLocation untuk menunjuk ke rute baru Anda.
-  initialLocation: '/ticket-overview', 
+  initialLocation: '/buyer-home', 
   routes: [
     GoRoute(
       path: '/ticket-overview',
