@@ -31,9 +31,10 @@ class ConcertWithTicket {
       filled: map['concert_ticket'] != null && map['concert_ticket'].isNotEmpty
           ? map['concert_ticket'][0]['filled'] ?? 0
           : 0,
-      availability: map['concert_ticket'] != null && map['concert_ticket'].isNotEmpty
-          ? map['concert_ticket'][0]['availability'] ?? 0
-          : 0,
+      availability:
+          map['concert_ticket'] != null && map['concert_ticket'].isNotEmpty
+              ? map['concert_ticket'][0]['availability'] ?? 0
+              : 0,
       concertPoster: map['concert_poster'] ?? '',
     );
   }
@@ -85,7 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<ConcertWithTicket>> fetchConcerts() async {
     final response = await Supabase.instance.client
         .from('concert_table')
-        .select('concert_id, concert_name, concert_date, location, concert_poster, concert_ticket(filled, availability)')
+        .select(
+            'concert_id, concert_name, concert_date, location, concert_poster, concert_ticket(filled, availability)')
         .order('concert_date', ascending: true);
 
     return (response as List)
@@ -136,11 +138,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
+                return Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
               }
               final concertList = _filteredConcerts;
               if (concertList.isEmpty) {
-                return const Center(child: Text('No concerts found.', style: TextStyle(color: Colors.white)));
+                return const Center(
+                  child: Text(
+                    'No concerts found.',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
               }
               return ListView(
                 children: [
@@ -156,12 +168,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           foreground: Paint()
                             ..shader = const LinearGradient(
                               colors: [Colors.pink, Color(0xFFC105FF)],
-                            ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                            ).createShader(
+                              const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                            ),
                         ),
                       ),
                       const CircleAvatar(
                         radius: 20,
-                        backgroundImage: AssetImage('assets/images/profile.jpg'),
+                        backgroundImage:
+                            AssetImage('assets/images/profile.jpg'),
                       ),
                     ],
                   ),
@@ -189,14 +204,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   gradientTitle("All Concerts"),
                   const SizedBox(height: 12),
-                  ...concertList.map((concert) => ConcertSimpleCard(
-                        concertName: concert.concertName,
-                        concertDate: concert.concertDate,
-                        location: concert.location,
-                        filled: concert.filled,
-                        availability: concert.availability,
-                        concertPoster: concert.concertPoster,
-                  )),
+                  ...concertList.map(
+                    (concert) => ConcertSimpleCard(
+                      concertName: concert.concertName,
+                      concertDate: concert.concertDate,
+                      location: concert.location,
+                      filled: concert.filled,
+                      availability: concert.availability,
+                      concertPoster: concert.concertPoster,
+                      onTap: () {
+                        context.go(
+                          '/book-ticket-overview',
+                          extra: {
+                            'concertId': concert.concertId,
+                            'concertName': concert.concertName,
+                            'concertDate': concert.concertDate,
+                            'location': concert.location,
+                            'poster': concert.concertPoster,
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               );
             },
@@ -215,7 +244,9 @@ class _HomeScreenState extends State<HomeScreen> {
         foreground: Paint()
           ..shader = const LinearGradient(
             colors: [Colors.white, Color(0xFFC105FF)],
-          ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+          ).createShader(
+            const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+          ),
       ),
     );
   }
@@ -228,6 +259,7 @@ class ConcertSimpleCard extends StatelessWidget {
   final int filled;
   final int availability;
   final String concertPoster;
+  final VoidCallback onTap;
 
   const ConcertSimpleCard({
     super.key,
@@ -237,6 +269,7 @@ class ConcertSimpleCard extends StatelessWidget {
     required this.filled,
     required this.availability,
     required this.concertPoster,
+    required this.onTap,
   });
 
   String get formattedDate {
@@ -250,52 +283,55 @@ class ConcertSimpleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      height: 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        image: concertPoster.isNotEmpty
-            ? DecorationImage(
-                image: NetworkImage(concertPoster),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(0.4),
-                  BlendMode.darken,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        height: 180,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          image: concertPoster.isNotEmpty
+              ? DecorationImage(
+                  image: NetworkImage(concertPoster),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.4),
+                    BlendMode.darken,
+                  ),
+                )
+              : null,
+          color: const Color(0xFF1D1E2D),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                concertName,
+                style: const TextStyle(
+                  color: Color(0xFFC105FF),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
                 ),
-              )
-            : null,
-        color: const Color(0xFF1D1E2D),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              concertName,
-              style: const TextStyle(
-                color: Color(0xFFC105FF),
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              formattedDate,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              location,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            const Spacer(),
-            Text(
-              'Sold: $filled / $availability',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                formattedDate,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                location,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const Spacer(),
+              Text(
+                'Sold: $filled / $availability',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
         ),
       ),
     );

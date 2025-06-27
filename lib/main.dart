@@ -23,6 +23,11 @@ import 'screen/buyer/page_setting.dart';
 import 'screen/buyer/my_ticket.dart';
 import 'screen/buyer/concert_detail.dart';
 import 'screen/buyer/concert_detail_completed.dart';
+import 'screen/buyer/book_ticket_overview.dart';
+import 'screen/buyer/category_booking_screen.dart';
+import 'screen/buyer/ticket_order_screen.dart';
+import 'screen/buyer/payment_method_selection_screen.dart';
+import 'screen/buyer/sold_out_screen.dart';
 
 // Organizer Screens
 import 'screen/organizer/home_screen.dart';
@@ -64,7 +69,7 @@ void main() async {
 }
 
 final GoRouter _router = GoRouter(
-  initialLocation: '/buyer-home',
+  initialLocation: '/login',
   routes: [
     // Choose Role Route
     GoRoute(
@@ -105,6 +110,67 @@ final GoRouter _router = GoRouter(
     ),
 
     // Buyer Routes
+    GoRoute(
+      path: '/sold_out',
+      builder: (context, state) => const SoldOutScreen(),
+    ),
+
+    GoRoute(
+      path: '/payment_method',
+      builder: (context, state) => const PaymentMethodSelectionScreen(),
+    ),
+
+    GoRoute(
+      path: '/ticket_order',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>;
+        return TicketOrderScreen(
+          category: args['category'],
+          price: args['price'],
+          color: args['color'],
+          concertId: args['concertId'],
+          concertName: args['concertName'],
+          concertDate: args['concertDate'],
+          location: args['location'],
+          poster: args['poster'],
+          initialTicketQuantities: args['initialTicketQuantities'] ?? {},
+        );
+      },
+    ),
+
+    GoRoute(
+      path: '/category_booking',
+      builder: (context, state) {
+        final args = state.extra! as Map<String, dynamic>;
+        return CategoryBookingScreen(
+          category: args['category'],
+          price: args['price'],
+          color: args['color'],
+          concertId: args['concertId'],
+          concertName: args['concertName'],
+          concertDate: args['concertDate'],
+          location: args['location'],
+          poster: args['poster'],
+          initialTicketQuantities: args['initialTicketQuantities'] ?? {},
+        );
+      },
+    ),
+
+    GoRoute(
+      path: '/book-ticket-overview',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+
+        return BookTicketOverviewScreen(
+          concertId: extra?['concertId'],
+          concertName: extra?['concertName'],
+          concertDate: extra?['concertDate'],
+          location: extra?['location'],
+          poster: extra?['poster'],
+        );
+      },
+    ),
+
     GoRoute(
       path: '/buyer-home',
       builder: (context, state) => HomeScreen(),

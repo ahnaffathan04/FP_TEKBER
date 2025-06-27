@@ -36,7 +36,8 @@ class _ConcertDetailCompletedState extends State<ConcertDetailCompleted> {
             itemCount: 5,
             unratedColor: Colors.white24,
             itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-            itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+            itemBuilder: (context, _) =>
+                const Icon(Icons.star, color: Colors.amber),
             onRatingUpdate: (value) => setState(() => rating = value),
           ),
         ),
@@ -79,7 +80,8 @@ class _ConcertDetailCompletedState extends State<ConcertDetailCompleted> {
               final feedback = feedbackController.text;
               // TODO: Kirim ke backend / simpan
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Feedback dikirim: ⭐$rating\n$feedback")),
+                SnackBar(
+                    content: Text("Feedback dikirim: ⭐$rating\n$feedback")),
               );
               feedbackController.clear();
               setState(() => rating = 0);
@@ -94,7 +96,8 @@ class _ConcertDetailCompletedState extends State<ConcertDetailCompleted> {
               child: const Center(
                 child: Text(
                   'Post',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
