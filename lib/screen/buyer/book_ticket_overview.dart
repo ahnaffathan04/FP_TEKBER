@@ -1,4 +1,4 @@
-// lib/screens/book_ticket_overview_screen.dart (perubahan)
+// lib/screens/book_ticket_overview_screen.dart (diperbaiki)
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,7 +36,10 @@ class BookTicketOverviewScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
+
+            // Card show details tanpa GestureDetector untuk navigasi
             _buildShowDetailsCard(context),
+
             const SizedBox(height: 20),
             // Menggunakan gambar untuk denah tempat duduk
             _buildSeatMapOverview(context),
@@ -50,6 +53,7 @@ class BookTicketOverviewScreen extends StatelessWidget {
             _buildCategoryRow(
                 context, 'CAT 3', 'RP300K', Colors.green, true), // Sold out
             const SizedBox(height: 20),
+
             SizedBox(
               width: double.infinity,
               height: 50,
