@@ -1,9 +1,12 @@
-// Importing necessary packages
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TambahTiketScreen extends StatefulWidget {
-  const TambahTiketScreen({Key? key}) : super(key: key);
+  final int concertId;
+
+  const TambahTiketScreen({Key? key, required this.concertId})
+      : super(key: key);
 
   @override
   State<TambahTiketScreen> createState() => _TambahTiketScreenState();
@@ -13,6 +16,9 @@ class _TambahTiketScreenState extends State<TambahTiketScreen> {
   final _formKey = GlobalKey<FormState>();
   final _hargaController = TextEditingController();
   final _jumlahController = TextEditingController();
+
+  bool isLoading = false;
+  String? _existingTicketId;
 
   final List<String> _kategoriList = [
     'Regular Early',
@@ -27,6 +33,123 @@ class _TambahTiketScreenState extends State<TambahTiketScreen> {
     _hargaController.dispose();
     _jumlahController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadTicketData(String category) async {
+    setState(() {
+      isLoading = true;
+      _hargaController.clear();
+      _jumlahController.clear();
+      _existingTicketId = null;
+    });
+
+    try {
+      final response = await Supabase.instance.client
+          .from('concert_ticket')
+          .select('concert_ticket_id, price, availability')
+          .eq('concert_id', widget.concertId)
+          .eq('category', category)
+          .single();
+
+      _existingTicketId = response['concert_ticket_id'] as String?;
+      _hargaController.text = (response['price'] as int).toString();
+      _jumlahController.text = (response['availability'] as int).toString();
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116') {
+        _hargaController.clear();
+        _jumlahController.clear();
+        _existingTicketId = null;
+      } else {
+        debugPrint('Error loading ticket data: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to load ticket data: ${e.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('An unexpected error occurred: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _simpanTiket() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
+      try {
+        final ticketData = {
+          'category': _selectedKategori,
+          'price': int.parse(_hargaController.text),
+          'availability': int.parse(_jumlahController.text),
+          'concert_id': widget.concertId,
+          'filled': 0,
+          'max_purchase': 10,
+        };
+
+        if (_existingTicketId != null) {
+          await Supabase.instance.client
+              .from('concert_ticket')
+              .update(ticketData)
+              .eq('concert_ticket_id', _existingTicketId!);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Tiket berhasil diupdate!',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor: Color(0xFF10C7EF),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          await Supabase.instance.client
+              .from('concert_ticket')
+              .insert(ticketData);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Tiket berhasil disimpan!',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor: Color(0xFF10C7EF),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menyimpan tiket: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() => isLoading = false);
+      }
+    }
   }
 
   @override
@@ -107,6 +230,9 @@ class _TambahTiketScreenState extends State<TambahTiketScreen> {
                     setState(() {
                       _selectedKategori = value;
                     });
+                    if (value != null) {
+                      _loadTicketData(value);
+                    }
                   },
                   validator: (value) =>
                       value == null ? 'Pilih kategori tiket' : null,
@@ -194,24 +320,9 @@ class _TambahTiketScreenState extends State<TambahTiketScreen> {
                       ],
                     ),
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Tiket berhasil disimpan!',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              backgroundColor: Color(0xFF10C7EF),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                          context.pop();
-                        }
-                      },
+                      onPressed: isLoading
+                          ? null
+                          : _simpanTiket, // Call _simpanTiket on press
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
@@ -219,15 +330,18 @@ class _TambahTiketScreenState extends State<TambahTiketScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Simpan',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF04181D),
-                        ),
-                      ),
+                      child: isLoading
+                          ? const CircularProgressIndicator(
+                              color: Color(0xFF04181D))
+                          : const Text(
+                              'Simpan',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF04181D),
+                              ),
+                            ),
                     ),
                   ),
                 ],

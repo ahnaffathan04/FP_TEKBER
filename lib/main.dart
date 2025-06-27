@@ -5,7 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Import screen QRScannerWeb
-import 'qr_scanner_web.dart'; 
+import 'qr_scanner_web.dart';
 
 // Auth Screens
 import 'screen/auth/login_screen.dart';
@@ -34,7 +34,6 @@ import 'screen/organizer/page_setting_organizer.dart';
 import 'screen/organizer/account_organizer.dart';
 import 'screen/organizer/language_organizer.dart';
 
-
 // Complaint Screens
 import 'screen/complaint/submit_complaint.dart';
 
@@ -47,7 +46,8 @@ void main() async {
 
   await Supabase.initialize(
     url: 'https://ncasjwbrdpjjvoouemwj.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jYXNqd2JyZHBqanZvb3VlbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNzMxNTcsImV4cCI6MjA2NTY0OTE1N30.DLx94pbPm8cMoxfQlzup2BIZxCN6lP5RNtXFYuYA-Bw', // 🔁 Replace with your Supabase anon key
   );
 
   await initializeDateFormatting('id', null);
@@ -77,7 +77,7 @@ final GoRouter _router = GoRouter(
       path: '/qr-scanner',
       builder: (context, state) => const QRScannerWeb(),
     ),
-    
+
     // Auth Routes
     GoRoute(
       path: '/login',
@@ -133,13 +133,13 @@ final GoRouter _router = GoRouter(
       path: '/concert/detail/completed',
       builder: (context, state) => ConcertDetailCompleted(),
     ),
-    
+
     // Organizer Routes
     GoRoute(
       path: '/organizer-home',
       builder: (context, state) => OrganizerHomeScreen(),
     ),
-        GoRoute(
+    GoRoute(
       path: '/organizer-home/setting',
       builder: (context, state) => OrganizerPageSetting(),
     ),
@@ -151,7 +151,7 @@ final GoRouter _router = GoRouter(
       path: '/organizer-home/tambah-konser',
       builder: (context, state) => TambahKonserScreen(),
     ),
-        GoRoute(
+    GoRoute(
       path: '/organizer-home/setting/language_organizer',
       builder: (context, state) => OrganizerLanguageScreen(),
     ),
@@ -176,7 +176,7 @@ final GoRouter _router = GoRouter(
             body: Center(child: Text('No concert data provided.')),
           );
         }
-        return TambahTiketScreen();
+        return TambahTiketScreen(concertId: concertTable['concert_id'] as int);
       },
     ),
     GoRoute(

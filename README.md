@@ -18,6 +18,16 @@ Sebelum memulai, pastikan Anda telah menginstal yang berikut:
 * **Flutter SDK**: Ikuti petunjuk instalasi resmi dari [dokumentasi Flutter](https://flutter.dev/docs/get-started/install).
 * **Git**: Diperlukan untuk mengkloning repositori. Anda bisa mengunduhnya dari [situs resmi Git](https://git-scm.com/downloads).
 
+# Akun Default
+Anda bisa menggunakan kedua akun deafult ini untuk 2 tipe user (atau memilih membikin akun dengan fitur register):
+1.  **Buyer**
+    Akun : buyer@gmail.com
+    Pass : buyerbuyer
+
+2.  **Organizer**
+    Akun : organizer@gmail.com
+    Pass : organizer
+
 ### Langkah-langkah Instalasi dan Menjalankan
 
 1.  **Kloning Repositori**

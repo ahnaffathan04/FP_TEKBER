@@ -7,7 +7,8 @@ import 'providers/concert_provider.dart';
 
 class ManageKonserScreen extends StatefulWidget {
   final Map<String, dynamic> concert_table;
-  const ManageKonserScreen({Key? key, required this.concert_table}) : super(key: key);
+  const ManageKonserScreen({Key? key, required this.concert_table})
+      : super(key: key);
 
   @override
   _ManageKonserScreenState createState() => _ManageKonserScreenState();
@@ -27,24 +28,44 @@ class _ManageKonserScreenState extends State<ManageKonserScreen> {
     });
   }
 
-Future<void> fetchTickets() async {
-  try {
-    final concert = Provider.of<ConcertProvider>(context, listen: false).concert;
-    final concertId = concert['concert_id'];
+  Future<void> fetchTickets() async {
+    try {
+      final concert =
+          Provider.of<ConcertProvider>(context, listen: false).concert;
+      final concertId = concert['concert_id'];
 
-    final response = await Supabase.instance.client
-        .from('concert_ticket')
-        .select('category, availability') // hanya ambil data yg dibutuhkan
-        .eq('concert_id', concertId);
+      final response = await Supabase.instance.client
+          .from('concert_ticket')
+          .select('category, availability')
+          .eq('concert_id', concertId);
 
-    setState(() {
-      tickets = List<Map<String, dynamic>>.from(response);
-    });
-  } catch (e) {
-    print('Error fetching tickets: $e');
+      Map<String, int> aggregatedTickets = {};
+
+      for (var ticketData in response) {
+        final category = ticketData['category'] as String;
+        final availability = ticketData['availability'] as int;
+
+        aggregatedTickets.update(
+          category,
+          (value) => value + availability,
+          ifAbsent: () => availability,
+        );
+      }
+      List<Map<String, dynamic>> consolidatedTickets = [];
+      aggregatedTickets.forEach((category, totalAvailability) {
+        consolidatedTickets.add({
+          'category': category,
+          'availability': totalAvailability,
+        });
+      });
+
+      setState(() {
+        tickets = consolidatedTickets;
+      });
+    } catch (e) {
+      print('Error fetching tickets: $e');
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -279,22 +300,22 @@ Future<void> fetchTickets() async {
               ),
             ),
             tickets.isEmpty
-              ? const Text('Tidak ada tiket tersedia.')
-              : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: tickets.map((ticket) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Text(
-                      '${ticket['category'] ?? 'Tiket'}: ${ticket['availability']} tersedia',
-                      style: const TextStyle(
-                        color: Colors.white,
-                    fontSize: 15,
+                ? const Text('Tidak ada tiket tersedia.')
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: tickets.map((ticket) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Text(
+                          '${ticket['category'] ?? 'Tiket'}: ${ticket['availability']} tersedia',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
 
             const SizedBox(height: 24),
             // Tombol Aksi
@@ -332,7 +353,7 @@ Future<void> fetchTickets() async {
                               await Supabase.instance.client
                                   .from('concert_table')
                                   .delete()
-                                  .eq('concert_id', concert['concert_id']); 
+                                  .eq('concert_id', concert['concert_id']);
                               setState(() => isLoading = false);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -387,10 +408,12 @@ Future<void> fetchTickets() async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TambahTiketScreen(),
+                            builder: (context) => TambahTiketScreen(
+                              concertId: concert['concert_id'],
+                            ),
                           ),
                         );
-                        // Refresh tickets after returning from TambahTiketScreen
+
                         fetchTickets();
                       },
                       child: const Text(
@@ -421,12 +444,12 @@ Future<void> fetchTickets() async {
                         context,
                         MaterialPageRoute(
                           builder: (context) => EditKonserScreen(
-                            concert_table: Provider.of<ConcertProvider>(context, listen: false).concert,
+                            concert_table: Provider.of<ConcertProvider>(context,
+                                    listen: false)
+                                .concert,
                           ),
                         ),
                       );
-                      // No need to setState or update widget.concert_table!
-                      // The UI will rebuild automatically because Provider notifies listeners.
                     },
                     child: const Text(
                       'Edit',
